@@ -5,7 +5,7 @@
  * The Cockpit passes the tasks into this component.
  */
 
-import type { Task } from "../lib/types";
+import type { Task } from "@/lib/types";
 
 interface TaskListProps {
   tasks: Task[];

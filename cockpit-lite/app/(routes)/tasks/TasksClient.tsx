@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { api } from "../../../../services/api";
-import type { Task, Project } from "../../../../lib/types";
-import { theme } from "../../../../ui/theme";
+import { api } from "@/services/api";
+import type { Task, Project } from "@/lib/types";
+import { theme } from "@/ui/theme";
 
 interface TasksClientProps {
   initialTasks: Task[];

@@ -5,9 +5,9 @@
  * Allows creation of new tasks through the API service layer.
  */
 
-import { api } from "../../../services/api";
-import type { Task, Project } from "../../../lib/types";
-import TaskList from "../../../components/TaskList";
+import { api } from "@/services/api";
+import type { Task, Project } from "@/lib/types";
+import TaskList from "@/components/TaskList";
 import TasksClient from "./TasksClient";
 
 export default async function TasksPage() {

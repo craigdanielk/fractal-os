@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { api } from "../../../../services/api";
-import type { Task, TimeEntry } from "../../../../lib/types";
-import TimeEntryForm from "../../../../components/TimeEntryForm";
-import { theme } from "../../../../ui/theme";
+import { api } from "@/services/api";
+import type { Task, TimeEntry } from "@/lib/types";
+import TimeEntryForm from "@/components/TimeEntryForm";
+import { theme } from "@/ui/theme";
 
 interface TimeClientProps {
   initialTasks: Task[];

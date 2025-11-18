@@ -7,8 +7,8 @@
 
 "use client";
 
-import type { Task } from "../lib/types";
-import { theme } from "../ui/theme";
+import type { Task } from "@/lib/types";
+import { theme } from "@/ui/theme";
 
 interface TimeEntryFormProps {
   tasks: Task[];

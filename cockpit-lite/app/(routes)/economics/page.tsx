@@ -5,10 +5,10 @@
  * Pulls from the deterministic Economics Engine.
  */
 
-import { api } from "../../../services/api";
-import type { EconomicsOverview } from "../../../lib/types";
-import { theme } from "../../../ui/theme";
-import EconomicsCharts from "../../../components/EconomicsCharts";
+import { api } from "@/services/api";
+import type { EconomicsOverview } from "@/lib/types";
+import { theme } from "@/ui/theme";
+import EconomicsCharts from "@/components/EconomicsCharts";
 
 export default async function EconomicsPage() {
   const econ = await api.getEconomicsOverview().catch(() => null);

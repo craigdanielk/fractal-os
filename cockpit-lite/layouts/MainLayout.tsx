@@ -10,7 +10,7 @@
 
 import { ReactNode } from "react";
 import Link from "next/link";
-import { theme } from "../ui/theme";
+import { theme } from "@/ui/theme";
 
 interface MainLayoutProps {
   children: ReactNode;

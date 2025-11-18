@@ -8,8 +8,8 @@
  *  - Contribution snapshots (if economics enabled)
  */
 
-import { api } from "../../../services/api";
-import type { Project, Task, EconomicsOverview } from "../../../lib/types";
+import { api } from "@/services/api";
+import type { Project, Task, EconomicsOverview } from "@/lib/types";
 
 export default async function DashboardPage() {
   const [projects, tasks, economics] = await Promise.all([

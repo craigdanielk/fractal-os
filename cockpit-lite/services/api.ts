@@ -20,7 +20,7 @@ import type {
   TimeEntry,
   EconomicsModel,
   EconomicsOverview,
-} from "../lib/types";
+} from "@/lib/types";
 
 // Calculate economics overview from time entries and projects
 async function calculateEconomicsOverview(): Promise<EconomicsOverview> {

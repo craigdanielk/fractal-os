@@ -7,8 +7,8 @@
  *  - feed the Economics Engine with labour data
  */
 
-import { api } from "../../../services/api";
-import type { Task, TimeEntry } from "../../../lib/types";
+import { api } from "@/services/api";
+import type { Task, TimeEntry } from "@/lib/types";
 import TimeClient from "./TimeClient";
 
 export default async function TimePage() {

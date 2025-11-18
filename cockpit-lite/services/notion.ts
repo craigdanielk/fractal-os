@@ -9,8 +9,8 @@ import {
   mapNotionTaskToFractal,
   mapNotionProjectToFractal,
   mapNotionTimeToFractal,
-} from "../lib/notion-mapper";
-import type { Task, Project, Client, TimeEntry, EconomicsModel } from "../lib/types";
+} from "@/lib/notion-mapper";
+import type { Task, Project, Client, TimeEntry, EconomicsModel } from "@/lib/types";
 
 const notion = new Client({
   auth: process.env.NOTION_API_KEY,
