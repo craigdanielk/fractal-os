@@ -1,0 +1,25 @@
+
+
+{
+  "$schema": "https://fractal-os/schema/manifest.json",
+  "name": "default-project",
+  "description": "Base manifest applied to all FractalOS projects before pattern-specific overrides.",
+  "patterns": [
+    "base-pattern"
+  ],
+  "modules": [
+    "web",
+    "automation",
+    "finance"
+  ],
+  "economics": {
+    "model": "agency-standard"
+  },
+  "settings": {
+    "enableSemanticMemory": true,
+    "enableEconomics": true,
+    "taskDefaults": {
+      "status": "open"
+    }
+  }
+}

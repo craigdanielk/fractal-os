@@ -1,0 +1,52 @@
+
+
+{
+  "$schema": "https://fractal-os/schema/pattern.json",
+  "name": "base-pattern",
+  "description": "Default foundational pattern applied to all FractalOS projects.",
+  "extends": null,
+
+  "scaffold": {
+    "directories": [
+      "src",
+      "src/components",
+      "src/lib",
+      "src/routes"
+    ],
+    "files": [
+      "README.md",
+      "src/index.ts"
+    ]
+  },
+
+  "economics": {
+    "defaults": {
+      "hourlyRates": {
+        "developer": 450,
+        "designer": 400,
+        "manager": 500
+      },
+      "overheadCost": 2000,
+      "directExpenses": 0,
+      "marginTargets": {
+        "min": 0.25,
+        "ideal": 0.4
+      }
+    }
+  },
+
+  "rules": {
+    "allowModules": [
+      "web",
+      "automation",
+      "finance"
+    ],
+    "requiredSchemas": [
+      "projectSchema",
+      "taskSchema",
+      "clientSchema",
+      "timeEntrySchema",
+      "economicsSchema"
+    ]
+  }
+}
