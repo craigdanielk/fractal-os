@@ -5,27 +5,26 @@
  * Allows creation of new tasks through the API service layer.
  */
 
+import { Suspense } from "react";
 import { api } from "@/services/api";
 import type { Task, Project } from "@/lib/types";
-import TaskList from "@/components/TaskList";
-import TasksClient from "./TasksClient";
+import TasksPageClient from "./TasksPageClient";
 
-export default async function TasksPage() {
+async function TasksContent() {
   const [tasks, projects] = await Promise.all([
     api.getTasks().catch(() => [] as Task[]),
     api.getProjects().catch(() => [] as Project[]),
   ]);
 
+  return <TasksPageClient initialTasks={tasks} projects={projects} />;
+}
+
+export default async function TasksPage() {
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1 style={{ marginBottom: "1.5rem" }}>Tasks</h1>
-
-      <TasksClient initialTasks={tasks} projects={projects} />
-
-      <section style={{ marginTop: "2rem" }}>
-        <h2 style={{ marginBottom: "0.75rem" }}>All Tasks</h2>
-        <TaskList tasks={tasks} />
-      </section>
+    <div className="glass-card">
+      <Suspense fallback={<div className="glass-panel animate-pulse">Loading tasks...</div>}>
+        <TasksContent />
+      </Suspense>
     </div>
   );
 }

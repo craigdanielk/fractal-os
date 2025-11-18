@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { api } from "@/services/api";
 import type { Task, Project } from "@/lib/types";
-import { theme } from "@/ui/theme";
 
 interface TasksClientProps {
   initialTasks: Task[];
@@ -14,7 +13,6 @@ export default function TasksClient({
   initialTasks,
   projects,
 }: TasksClientProps) {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [newTaskName, setNewTaskName] = useState<string>("");
   const [newTaskProjectId, setNewTaskProjectId] = useState<string>("");
 
@@ -22,35 +20,34 @@ export default function TasksClient({
     if (!newTaskName || !newTaskProjectId) return;
 
     try {
-      const created = await api.createTask({
+      await api.createTask({
         name: newTaskName,
         projectId: newTaskProjectId,
       });
 
-      setTasks((prev) => [...prev, created]);
-      setNewTaskName("");
-      setNewTaskProjectId("");
+      // Refresh the page to show new task
+      window.location.reload();
     } catch (err) {
       console.error("Failed to create task:", err);
     }
   };
 
   return (
-    <section style={{ marginBottom: "2rem" }}>
-      <h2 style={{ marginBottom: "0.75rem" }}>Create Task</h2>
+    <section className="glass-card mb-6">
+      <h2 className="text-xl font-semibold mb-4">Create Task</h2>
 
-      <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+      <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
         <input
           placeholder="Task name"
           value={newTaskName}
           onChange={(e) => setNewTaskName(e.target.value)}
-          style={theme.inputs.text}
+          className="px-3 py-2 rounded-lg border border-white/30 bg-white/20 backdrop-blur-sm flex-1 min-w-[200px]"
         />
 
         <select
           value={newTaskProjectId}
           onChange={(e) => setNewTaskProjectId(e.target.value)}
-          style={theme.inputs.select}
+          className="px-3 py-2 rounded-lg border border-white/30 bg-white/20 backdrop-blur-sm min-w-[200px]"
         >
           <option value="">Select project</option>
           {projects.map((p) => (
@@ -60,7 +57,10 @@ export default function TasksClient({
           ))}
         </select>
 
-        <button style={theme.buttons.primary} onClick={handleCreateTask}>
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          onClick={handleCreateTask}
+        >
           Add Task
         </button>
       </div>

@@ -8,7 +8,6 @@
 "use client";
 
 import type { Task } from "@/lib/types";
-import { theme } from "@/ui/theme";
 
 interface TimeEntryFormProps {
   tasks: Task[];
@@ -28,14 +27,14 @@ export default function TimeEntryForm({
   onSubmit,
 }: TimeEntryFormProps) {
   return (
-    <div style={{ marginBottom: "2rem" }}>
-      <h2 style={theme.headings.h2}>Log Time</h2>
+    <div className="glass-card mb-6">
+      <h2 className="text-xl font-semibold mb-4">Log Time</h2>
 
-      <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+      <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
         <select
           value={selectedTaskId}
           onChange={(e) => onSelectTask(e.target.value)}
-          style={theme.inputs.select}
+          className="px-3 py-2 rounded-lg border border-white/30 bg-white/20 backdrop-blur-sm min-w-[200px]"
         >
           <option value="">Select task</option>
           {tasks.map((t) => (
@@ -52,10 +51,13 @@ export default function TimeEntryForm({
           placeholder="Hours"
           value={hours}
           onChange={(e) => onHoursChange(e.target.value)}
-          style={theme.inputs.text}
+          className="px-3 py-2 rounded-lg border border-white/30 bg-white/20 backdrop-blur-sm w-24"
         />
 
-        <button style={theme.buttons.primary} onClick={onSubmit}>
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          onClick={onSubmit}
+        >
           Add
         </button>
       </div>

@@ -5,67 +5,58 @@
  * Pulls from the deterministic Economics Engine.
  */
 
+import { Suspense } from "react";
 import { api } from "@/services/api";
 import type { EconomicsOverview } from "@/lib/types";
-import { theme } from "@/ui/theme";
 import EconomicsCharts from "@/components/EconomicsCharts";
 
-export default async function EconomicsPage() {
+async function EconomicsContent() {
   const econ = await api.getEconomicsOverview().catch(() => null);
 
   if (!econ) {
     return (
-      <div style={{ padding: theme.spacing.lg }}>
-        <h1 style={theme.headings.h1}>Economics Overview</h1>
-        <p style={{ opacity: 0.6 }}>Economics disabled or unavailable.</p>
-      </div>
+      <>
+        <h1 className="text-3xl font-bold mb-4">Economics Overview</h1>
+        <p className="text-gray-500">Economics disabled or unavailable.</p>
+      </>
     );
   }
 
   return (
-    <div style={{ padding: theme.spacing.lg }}>
-      <h1 style={theme.headings.h1}>Economics Overview</h1>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold mb-6">Economics Overview</h1>
 
-      <section style={{ marginBottom: theme.spacing.xl }}>
-        <h2 style={theme.headings.h2}>System Summary</h2>
-        <div
-          style={{
-            padding: "1rem",
-            border: `1px solid ${theme.colors.border}`,
-            borderRadius: "6px",
-            background: theme.colors.surface,
-            fontFamily: "monospace",
-            whiteSpace: "pre-wrap",
-            fontSize: "0.9rem",
-          }}
-        >
-          Revenue: {econ.revenue}
-          {"\n"}Labour Cost: {econ.labourCost}
-          {"\n"}Overhead Cost: {econ.overheadCost}
-          {"\n"}Direct Expenses: {econ.directExpenses}
-          {"\n"}Total Cost: {econ.totalCost}
-          {"\n"}Contribution: {econ.contribution}
-          {"\n"}Margin: {econ.margin}%
+      <div className="glass-card">
+        <h2 className="text-xl font-semibold mb-4">System Summary</h2>
+        <div className="p-4 rounded-lg bg-white/10 backdrop-blur-sm font-mono text-sm whitespace-pre-wrap">
+          {`Revenue: ${econ.revenue}
+Labour Cost: ${econ.labourCost}
+Overhead Cost: ${econ.overheadCost}
+Direct Expenses: ${econ.directExpenses}
+Total Cost: ${econ.totalCost}
+Contribution: ${econ.contribution}
+Margin: ${econ.margin.toFixed(1)}%`}
         </div>
-      </section>
+      </div>
 
       <EconomicsCharts data={econ} />
 
-      <section style={{ marginTop: theme.spacing.xl }}>
-        <h2 style={theme.headings.h2}>Raw Economics Object</h2>
-        <pre
-          style={{
-            padding: "1rem",
-            border: `1px solid ${theme.colors.border}`,
-            borderRadius: "6px",
-            background: theme.colors.surface,
-            overflowX: "auto",
-            fontSize: "0.85rem",
-          }}
-        >
+      <div className="glass-card">
+        <h2 className="text-xl font-semibold mb-4">Raw Economics Object</h2>
+        <pre className="p-4 rounded-lg bg-white/10 backdrop-blur-sm overflow-x-auto text-sm">
           {JSON.stringify(econ, null, 2)}
         </pre>
-      </section>
+      </div>
+    </div>
+  );
+}
+
+export default async function EconomicsPage() {
+  return (
+    <div className="glass-card">
+      <Suspense fallback={<div className="glass-panel animate-pulse">Loading economics...</div>}>
+        <EconomicsContent />
+      </Suspense>
     </div>
   );
 }

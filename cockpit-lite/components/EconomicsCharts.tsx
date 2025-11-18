@@ -5,6 +5,8 @@
  * This is intentionally lightweight for the Lite Cockpit.
  */
 
+import { theme } from "@/ui/theme";
+
 interface EconomicsData {
   revenue: number;
   labourCost: number;
@@ -25,12 +27,12 @@ export default function EconomicsCharts({ data }: EconomicsChartsProps) {
   }
 
   return (
-    <div style={{ marginTop: "2rem" }}>
-      <section style={{ marginBottom: "1.5rem" }}>
-        <h2 style={{ marginBottom: "0.75rem" }}>Economics Breakdown</h2>
+    <div className="glass-card">
+      <section className="mb-6">
+        <h2 className="text-xl font-semibold mb-4">Economics Breakdown</h2>
       </section>
 
-      <ul style={{ lineHeight: "1.6", listStyle: "none", padding: 0 }}>
+      <ul className="leading-relaxed list-none p-0 space-y-2">
         <li>
           <strong>Revenue:</strong> R{data.revenue.toFixed(2)}
         </li>

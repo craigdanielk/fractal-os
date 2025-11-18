@@ -4,7 +4,7 @@ import { useState } from "react";
 import { api } from "@/services/api";
 import type { Task, TimeEntry } from "@/lib/types";
 import TimeEntryForm from "@/components/TimeEntryForm";
-import { theme } from "@/ui/theme";
+import TimeTracker from "@/components/TimeTracker";
 
 interface TimeClientProps {
   initialTasks: Task[];
@@ -41,9 +41,20 @@ export default function TimeClient({
     }
   };
 
+  const handleRefresh = async () => {
+    try {
+      const newEntries = await api.getTimeEntries();
+      setEntries(newEntries);
+    } catch (error) {
+      console.error("Failed to refresh entries:", error);
+    }
+  };
+
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1 style={{ marginBottom: "1.5rem" }}>Time Tracking</h1>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold mb-6">Time Tracking</h1>
+
+      <TimeTracker tasks={tasks} onTimeLogged={handleRefresh} />
 
       <TimeEntryForm
         tasks={tasks}
@@ -54,25 +65,22 @@ export default function TimeClient({
         onSubmit={handleLogTime}
       />
 
-      <section>
-        <h2 style={{ marginBottom: "0.75rem" }}>Time Entries</h2>
+      <section className="glass-card">
+        <h2 className="text-xl font-semibold mb-4">Time Entries</h2>
 
         {entries.length === 0 ? (
-          <p style={{ opacity: 0.6 }}>No time entries logged.</p>
+          <p className="text-gray-500">No time entries logged.</p>
         ) : (
-          <ul style={{ listStyle: "none", padding: 0 }}>
+          <ul className="list-none p-0 space-y-2">
             {entries.map((e) => (
               <li
                 key={e.id}
-                style={{
-                  padding: "0.5rem 0",
-                  borderBottom: "1px solid #f0f0f0",
-                }}
+                className="flex justify-between items-center p-2 border-b border-white/20 last:border-0"
               >
-                <strong>
+                <span className="font-medium">
                   {tasks.find((t) => t.id === e.taskId)?.name || "Unknown Task"}
-                </strong>{" "}
-                — {e.hours} hours
+                </span>
+                <span className="text-gray-600 dark:text-gray-400">{e.hours.toFixed(2)} hours</span>
               </li>
             ))}
           </ul>
