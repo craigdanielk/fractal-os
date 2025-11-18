@@ -1,0 +1,46 @@
+{
+  "version": "1.0.0",
+  "flows": [
+    {
+      "id": "time-entry-rollup",
+      "name": "Recalculate Time Entry Aggregates",
+      "description": "Non-autonomous flow triggered manually to recompute project/client aggregates after new time entries.",
+      "steps": [
+        {
+          "id": "load-projects",
+          "type": "kernel.projects.list"
+        },
+        {
+          "id": "load-time",
+          "type": "kernel.time.list"
+        },
+        {
+          "id": "load-economics",
+          "type": "kernel.economics.loadModel"
+        },
+        {
+          "id": "recompute",
+          "type": "kernel.economics.computeClientContribution",
+          "inputs": {
+            "projects": "@load-projects.result",
+            "timeEntries": "@load-time.result",
+            "model": "@load-economics.result"
+          }
+        },
+        {
+          "id": "output",
+          "type": "automation.output",
+          "inputs": {
+            "status": "ok",
+            "data": "@recompute.result"
+          }
+        }
+      ],
+      "constraints": {
+        "manualTriggerOnly": true,
+        "deterministic": true,
+        "maxSteps": 10
+      }
+    }
+  ]
+}

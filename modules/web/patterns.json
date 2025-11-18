@@ -1,0 +1,74 @@
+
+
+{
+  "version": "1.0.0",
+  "patterns": [
+    {
+      "id": "landing-page",
+      "name": "Landing Page Scaffold",
+      "description": "A deterministic scaffold for building a high-conversion landing page layout.",
+      "sections": [
+        {
+          "id": "hero",
+          "type": "section.hero",
+          "props": {
+            "headline": "Your Headline Here",
+            "subheadline": "A concise value proposition.",
+            "cta": "Get Started"
+          }
+        },
+        {
+          "id": "features",
+          "type": "section.features",
+          "props": {
+            "items": [
+              { "title": "Feature One", "description": "Description here." },
+              { "title": "Feature Two", "description": "Description here." },
+              { "title": "Feature Three", "description": "Description here." }
+            ]
+          }
+        },
+        {
+          "id": "cta",
+          "type": "section.callToAction",
+          "props": {
+            "headline": "Take Action",
+            "cta": "Sign Up"
+          }
+        }
+      ],
+      "constraints": {
+        "deterministic": true,
+        "noAutonomy": true,
+        "maxSections": 6
+      }
+    },
+    {
+      "id": "shopify-product-page",
+      "name": "Shopify Product Page Boilerplate",
+      "description": "Pattern for quickly scaffolding a product page structure for Shopify builds.",
+      "sections": [
+        { "id": "product-gallery", "type": "shopify.gallery" },
+        { "id": "product-details", "type": "shopify.details" },
+        { "id": "product-buybox", "type": "shopify.buybox" }
+      ],
+      "constraints": {
+        "deterministic": true,
+        "maxSections": 5
+      }
+    },
+    {
+      "id": "simple-blog",
+      "name": "Simple Blog Layout",
+      "description": "A minimal blog layout scaffold.",
+      "sections": [
+        { "id": "post-list", "type": "content.posts" },
+        { "id": "sidebar", "type": "content.sidebar" }
+      ],
+      "constraints": {
+        "deterministic": true,
+        "maxSections": 3
+      }
+    }
+  ]
+}

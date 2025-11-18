@@ -1,0 +1,27 @@
+
+
+{
+  "tasks": {
+    "list": "kernel.tasks.list",
+    "create": "kernel.tasks.create",
+    "update": "kernel.tasks.update"
+  },
+  "projects": {
+    "list": "kernel.projects.list",
+    "create": "kernel.projects.create",
+    "update": "kernel.projects.update"
+  },
+  "time": {
+    "list": "kernel.time.list",
+    "log": "kernel.time.log"
+  },
+  "economics": {
+    "computeLabourCost": "kernel.economics.computeLabourCost",
+    "computeProjectContribution": "kernel.economics.computeProjectContribution",
+    "computeClientContribution": "kernel.economics.computeClientContribution"
+  },
+  "patterns": {
+    "apply": "kernel.patterns.apply",
+    "load": "kernel.patterns.load"
+  }
+}

@@ -1,0 +1,57 @@
+
+
+{
+  "version": "1.0.0",
+  "patterns": [
+    {
+      "id": "rebar-processing",
+      "name": "Rebar Processing Pattern",
+      "description": "A deterministic workflow template for companies that buy, cut, bend, and resell rebar to construction and mining clients.",
+      "steps": [
+        {
+          "id": "load-inventory",
+          "type": "kernel.manufacturing.loadInventory"
+        },
+        {
+          "id": "load-orders",
+          "type": "kernel.manufacturing.loadOrders"
+        },
+        {
+          "id": "match-specs",
+          "type": "kernel.manufacturing.matchSpecifications",
+          "inputs": {
+            "inventory": "@load-inventory.result",
+            "orders": "@load-orders.result"
+          }
+        },
+        {
+          "id": "calculate-processing",
+          "type": "kernel.manufacturing.calculateProcessingCosts",
+          "inputs": {
+            "matched": "@match-specs.result"
+          }
+        },
+        {
+          "id": "generate-work-orders",
+          "type": "kernel.manufacturing.generateWorkOrders",
+          "inputs": {
+            "processing": "@calculate-processing.result"
+          }
+        },
+        {
+          "id": "output",
+          "type": "pattern.output",
+          "inputs": {
+            "status": "generated",
+            "workOrders": "@generate-work-orders.result"
+          }
+        }
+      ],
+      "constraints": {
+        "deterministic": true,
+        "noAutonomy": true,
+        "maxSteps": 12
+      }
+    }
+  ]
+}

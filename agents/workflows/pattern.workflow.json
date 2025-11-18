@@ -1,0 +1,55 @@
+export * from "./client.schema";
+export * from "./project.schema";
+export * from "./task.schema";
+export * from "./time_entry.schema";
+export * from "./economics.schema";
+
+{
+  "$schema": "https://fractal-os.dev/schema/pattern-workflow.json",
+
+  "name": "pattern-application-workflow",
+  "version": "1.0.0",
+
+  "description": "Deterministic agent workflow for applying FractalOS patterns to a project. No autonomous loops, no business logic, strictly Kernel-command driven.",
+
+  "steps": [
+    {
+      "id": "load-manifest",
+      "type": "kernel.manifest.load",
+      "inputs": {
+        "path": "kernel/manifests/base.manifest.json"
+      }
+    },
+    {
+      "id": "select-pattern",
+      "type": "kernel.patterns.load",
+      "inputs": {
+        "pattern": "base.pattern"
+      }
+    },
+    {
+      "id": "apply-pattern",
+      "type": "kernel.patterns.apply",
+      "inputs": {
+        "patternRef": "@select-pattern.result",
+        "context": "@load-manifest.result"
+      }
+    },
+    {
+      "id": "output",
+      "type": "agent.output",
+      "inputs": {
+        "status": "generated",
+        "files": "@apply-pattern.result.files",
+        "directories": "@apply-pattern.result.directories"
+      }
+    }
+  ],
+
+  "constraints": {
+    "deterministic": true,
+    "maxSteps": 6,
+    "noRecursion": true,
+    "noExternalCalls": true
+  }
+}

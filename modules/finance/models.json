@@ -1,0 +1,28 @@
+
+
+{
+  "version": "1.0.0",
+  "models": {
+    "economicsModel": {
+      "description": "Defines cost structures used by the Economics Engine.",
+      "fields": {
+        "hourlyRate": "number",
+        "overheadCost": "number",
+        "directExpenses": "number",
+        "currency": "string"
+      }
+    },
+    "invoice": {
+      "description": "Basic invoice representation for future modular use.",
+      "fields": {
+        "id": "string",
+        "clientId": "string",
+        "projectId": "string?",
+        "amount": "number",
+        "status": "string",
+        "issuedAt": "string",
+        "paidAt": "string?"
+      }
+    }
+  }
+}

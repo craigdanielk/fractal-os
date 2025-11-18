@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0",
+  "entities": {
+    "clientProfile": {
+      "description": "Minimal CRM profile used by the Kernel and Cockpit.",
+      "fields": {
+        "id": "string",
+        "name": "string",
+        "email": "string?",
+        "phone": "string?",
+        "notes": "string?",
+        "createdAt": "string",
+        "updatedAt": "string?"
+      }
+    },
+    "contactEvent": {
+      "description": "Log of any client-facing interaction.",
+      "fields": {
+        "id": "string",
+        "clientId": "string",
+        "type": "string",
+        "summary": "string",
+        "timestamp": "string"
+      }
+    }
+  }
+}
