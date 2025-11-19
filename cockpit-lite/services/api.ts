@@ -2,13 +2,10 @@
  * API Service Layer
  * 
  * Provides typed access to all data operations
+ * Now uses Supabase via Data provider
  */
 
-import { getTasks } from "./tasks";
-import { getProjects } from "./projects";
-import { getSessions } from "./time";
-import { getEconomics } from "./economics";
-import { createTimeEntry, createTask } from "./notion";
+import { Data } from "@/lib/data";
 import type {
   Task,
   Project,
@@ -22,20 +19,20 @@ import type {
 
 export const api = {
   // Read operations
-  getTasks,
-  getProjects,
-  getSessions,
-  getEconomics,
+  getTasks: () => Data.tasks.list(),
+  getProjects: () => Data.projects.list(),
+  getSessions: () => Data.time.list(),
+  getEconomics: () => Data.economics.list(),
 
   // Write operations
-  logTime: createTimeEntry,
-  createTask,
+  logTime: (data: any) => Data.time.create(data),
+  createTask: (data: any) => Data.tasks.create(data),
 
   // Convenience aliases
-  tasks: getTasks,
-  projects: getProjects,
-  sessions: getSessions,
-  economics: getEconomics,
+  tasks: () => Data.tasks.list(),
+  projects: () => Data.projects.list(),
+  sessions: () => Data.time.list(),
+  economics: () => Data.economics.list(),
 };
 
 // Default export for backward compatibility

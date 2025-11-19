@@ -12,8 +12,13 @@ export interface Task {
 
 export interface Project {
   id: string;
-  title: string;
-  raw: any;
+  name: string;
+  status: string;
+  progress: number;
+  startDate: string | null;
+  endDate: string | null;
+  health: string;
+  client: string | null;
 }
 
 export interface Client {

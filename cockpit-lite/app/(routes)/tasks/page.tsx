@@ -1,8 +1,8 @@
-import { getTasks } from "@/services/tasks";
+import { LiveState } from "../../../../kernel/workers/state";
 import { DynamicFields } from "../../../components/DynamicFields";
 
 export default async function TasksPage() {
-  const tasks = await getTasks();
+  const tasks = await LiveState.get("tasks");
 
   return (
     <div className="p-6">

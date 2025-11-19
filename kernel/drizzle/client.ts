@@ -1,9 +1,17 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Client } from "pg";
+import { drizzle } from "drizzle-orm/postgres-js";
 
-const client = new Client({
-  connectionString: process.env.DATABASE_URL
-});
+import postgres from "postgres";
 
-export const db = drizzle(client);
 
+
+if (!process.env.SUPABASE_DB_URL) {
+
+  throw new Error("Missing SUPABASE_DB_URL");
+
+}
+
+
+
+const queryClient = postgres(process.env.SUPABASE_DB_URL, { prepare: false });
+
+export const db = drizzle(queryClient);

@@ -1,4 +1,5 @@
-// Fractal Mapper v1 – Normalises all Notion entities for Cockpit Lite
+// Fractal Mapper v1 – DEPRECATED: No longer using Notion
+// This file is kept for reference but is not actively used
 
 import type {
   NotionTask,

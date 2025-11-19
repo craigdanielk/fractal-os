@@ -18,6 +18,7 @@ import { loadManifest } from "../manifests/base.manifest.json";
 import { loadPatterns } from "../patterns/index";
 import { registerCommands } from "../commands/index";
 import { KernelInterface } from "../utils/helpers";
+import { initRealtimeWorkers } from "../workers/realtime.worker";
 
 export async function bootKernel(): Promise<KernelInterface> {
   // 1. Load environment configuration
@@ -49,6 +50,9 @@ export async function bootKernel(): Promise<KernelInterface> {
     patterns,
     commands
   };
+
+  // 7. Initialize realtime workers
+  initRealtimeWorkers();
 
   return kernel;
 }

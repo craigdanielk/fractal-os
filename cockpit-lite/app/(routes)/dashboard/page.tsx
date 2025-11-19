@@ -1,11 +1,9 @@
-import { getProjects } from "@/services/projects";
-import { getTasks } from "@/services/tasks";
-import { getEconomics } from "@/services/economics";
+import { LiveState } from "../../../../kernel/workers/state";
 
 export default async function Dashboard() {
-  const projects = await getProjects();
-  const tasks = await getTasks();
-  const econ = await getEconomics();
+  const projects = await LiveState.get("projects");
+  const tasks = await LiveState.get("tasks");
+  const econ = await LiveState.get("economics");
 
   const today = new Date().toISOString().split("T")[0];
   const todaysTasks = tasks.filter(t => t.raw["Due Date"]?.value?.date?.start === today);
@@ -21,7 +19,7 @@ export default async function Dashboard() {
         <p className="mb-6">
           {projects.length === 0
             ? "No projects found."
-            : projects.map(p => p.title).join(", ")}
+            : projects.map(p => p.name).join(", ")}
         </p>
 
         <h2 className="font-semibold text-lg">Today's Tasks</h2>

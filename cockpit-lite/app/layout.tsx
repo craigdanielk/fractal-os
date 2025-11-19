@@ -11,7 +11,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="min-h-screen flex bg-gradient-to-br from-[#e6ecf0] to-[#cfd9df] text-black">
         <aside className="sidebar fixed left-0 top-0 h-full w-64 p-6 backdrop-blur-xl bg-white/20 border-r border-white/30 hidden md:flex flex-col gap-4">
-          <h1 className="text-2xl font-bold mb-6">FractalOS</h1>
+          <h1 className="text-2xl font-bold mb-6">FRACTΛL</h1>
 
           <Link className="nav-item" href="/dashboard">Dashboard</Link>
           <Link className="nav-item" href="/projects">Projects</Link>
