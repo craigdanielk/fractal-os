@@ -10,7 +10,6 @@ export const manifests = { base: baseManifest };
 
 export type KernelManifest = typeof baseManifest;
 
-export function loadManifest() {
+export function getManifest() {
   return manifests.base;
 }
-

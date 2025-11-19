@@ -1,13 +1,12 @@
-
-
-/**
+/****
  * TimeEntryForm Component
  *
- * Stateless form for logging time into a selected task.
- * The parent page handles submission and state updates.
+ * Deterministic, controlled component for logging time to a task.
+ * Uses Cockpit UI primitives and enforces clean numeric input.
  */
 
 import type { Task } from "../../kernel/schemas";
+import { theme } from "../ui/theme";
 
 interface TimeEntryFormProps {
   tasks: Task[];
@@ -28,30 +27,36 @@ export default function TimeEntryForm({
 }: TimeEntryFormProps) {
   return (
     <div style={{ marginBottom: "2rem" }}>
-      <h2>Log Time</h2>
+      <h2 style={theme.headings.h2}>Log Time</h2>
 
-      <select
-        value={selectedTaskId}
-        onChange={(e) => onSelectTask(e.target.value)}
-        style={{ marginRight: "1rem" }}
-      >
-        <option value="">Select task</option>
-        {tasks.map((t) => (
-          <option key={t.id} value={t.id}>
-            {t.name}
-          </option>
-        ))}
-      </select>
+      <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+        <select
+          value={selectedTaskId}
+          onChange={(e) => onSelectTask(e.target.value)}
+          style={theme.inputs.select}
+        >
+          <option value="">Select task</option>
+          {tasks.map((t) => (
+            <option key={t.id} value={t.id}>
+              {t.name}
+            </option>
+          ))}
+        </select>
 
-      <input
-        type="number"
-        placeholder="Hours"
-        value={hours}
-        onChange={(e) => onHoursChange(e.target.value)}
-        style={{ width: "80px", marginRight: "1rem" }}
-      />
+        <input
+          type="number"
+          min="0"
+          step="0.25"
+          placeholder="Hours"
+          value={hours}
+          onChange={(e) => onHoursChange(e.target.value)}
+          style={theme.inputs.text}
+        />
 
-      <button onClick={onSubmit}>Add</button>
+        <button style={theme.buttons.primary} onClick={onSubmit}>
+          Add
+        </button>
+      </div>
     </div>
   );
 }

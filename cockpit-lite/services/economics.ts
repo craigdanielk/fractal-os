@@ -3,11 +3,8 @@ import { query } from "./notion";
 
 export interface EconomicsModel {
   id: string;
-  revenue: number;
-  labour: number;
-  overhead: number;
-  direct: number;
-  margin: number;
+  title: string;
+  raw: any;
 }
 
 function num(p: any) {
@@ -16,15 +13,15 @@ function num(p: any) {
 
 export async function getEconomics(): Promise<EconomicsModel[]> {
   const res = await query(DB.economics);
-  return res.results.map((e: any) => {
-    const props = e.properties;
+  return res.results.map((page: any) => {
+    const props = page.properties || {};
+    const { mapProps } = require("../lib/prop-mapper");
+    const mapped = mapProps(DB.economics, props);
+
     return {
-      id: e.id,
-      revenue: num(props["Revenue"]),
-      labour: num(props["Labour Cost"]),
-      overhead: num(props["Overhead %"]),
-      direct: num(props["Direct Expenses"]),
-      margin: num(props["Margin Targets"]),
+      id: page.id,
+      title: mapped["Name"]?.value?.title?.[0]?.plain_text ?? "Untitled",
+      raw: mapped,
     };
   });
 }

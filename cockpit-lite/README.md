@@ -1,5 +1,11 @@
 # FractalOS Cockpit Lite
 
+## IMPORTANT
+Run this once whenever your Notion schema changes:
+```bash
+curl http://localhost:3000/api/notion-sync
+```
+
 Next.js App Router implementation of the FractalOS Cockpit interface.
 
 ## Setup

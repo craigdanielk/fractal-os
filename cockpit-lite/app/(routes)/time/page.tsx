@@ -1,33 +1,20 @@
-import { getTimeEntries } from "@/services/time";
-import { getTasks } from "@/services/tasks";
+import { getSessions } from "@/services/time";
+import { DynamicFields } from "../../../components/DynamicFields";
 
 export default async function TimePage() {
-  const entries = await getTimeEntries();
-  const tasks = await getTasks();
-
-  const lookup = Object.fromEntries(
-    tasks.map(t => [t.id, t.name])
-  );
+  const sessions = await getSessions();
 
   return (
-    <main className="p-10 flex justify-center min-h-screen">
-      <div className="glass-card w-[700px] p-8 rounded-3xl shadow-xl">
-        <h1 className="text-3xl font-bold mb-6">Time Tracking</h1>
-
-        {entries.length === 0 ? (
-          <p>No time entries logged.</p>
-        ) : (
-          <ul className="space-y-4">
-            {entries.map(e => (
-              <li key={e.id} className="p-3 bg-white/30 rounded-xl backdrop-blur">
-                <p>Task: {lookup[e.task[0]] || "Unknown"}</p>
-                <p>Hours: {e.hours}</p>
-                <p>Date: {e.date}</p>
-              </li>
-            ))}
-          </ul>
-        )}
+    <div className="p-6">
+      <h1 className="text-xl font-semibold mb-4">Sessions</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {sessions.map((s: any) => (
+          <div className="p-4 rounded-xl bg-white/10 backdrop-blur border border-white/10" key={s.id}>
+            <div className="font-medium mb-2">{s.title}</div>
+            <DynamicFields raw={s.raw} />
+          </div>
+        ))}
       </div>
-    </main>
+    </div>
   );
 }

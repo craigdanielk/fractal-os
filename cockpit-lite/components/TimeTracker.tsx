@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from "react";
 import type { Task } from "@/lib/types";
-import { api } from "@/services/api";
+import { logTimeAction } from "@/app/actions";
 
 interface TimeTrackerProps {
   tasks: Task[];
@@ -53,9 +53,9 @@ export default function TimeTracker({ tasks, onTimeLogged }: TimeTrackerProps) {
     if (!task) return;
 
     try {
-      await api.logTime({
+      await logTimeAction({
         taskId: selectedTaskId,
-        projectId: task.projectId,
+        projectId: task.raw["Project"]?.value?.relation?.[0] || "",
         hours: parseFloat(hours.toFixed(2)),
       });
 
@@ -80,18 +80,18 @@ export default function TimeTracker({ tasks, onTimeLogged }: TimeTrackerProps) {
   return (
     <div className="glass-card mb-4">
       <h3 className="text-lg font-semibold mb-3">Quick Time Tracker</h3>
-      
+
       <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
         <select
+          className="w-full p-2 rounded bg-white/10 border border-white/20 text-white"
           value={selectedTaskId}
           onChange={(e) => setSelectedTaskId(e.target.value)}
           disabled={isTracking}
-          className="px-3 py-2 rounded-lg border border-white/30 bg-white/20 backdrop-blur-sm flex-1 min-w-[200px] disabled:opacity-50"
         >
-          <option value="">Select task</option>
+          <option value="">Select a task...</option>
           {tasks.map((t) => (
             <option key={t.id} value={t.id}>
-              {t.name}
+              {t.title}
             </option>
           ))}
         </select>

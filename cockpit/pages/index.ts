@@ -1,9 +1,8 @@
-
-
-/**
- * Pages Index
+/****
+ * Cockpit Pages Barrel
  *
- * Simple export barrel for Cockpit pages.
+ * Central export point for all Cockpit route pages.
+ * Ensures consistent imports across the Cockpit layer.
  */
 
 export { default as DashboardPage } from "./dashboard";

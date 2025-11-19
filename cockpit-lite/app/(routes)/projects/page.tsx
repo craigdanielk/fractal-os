@@ -1,29 +1,21 @@
 import { getProjects } from "@/services/projects";
+import { DynamicFields } from "../../../components/DynamicFields";
 
 export default async function ProjectsPage() {
   const projects = await getProjects();
 
   return (
-    <main className="p-10 flex justify-center min-h-screen">
-      <div className="glass-card w-[700px] p-8 rounded-3xl shadow-xl">
-        <h1 className="text-3xl font-bold mb-6">Projects</h1>
-
-        {projects.length === 0 ? (
-          <p>No projects found.</p>
-        ) : (
-          <ul className="space-y-4">
-            {projects.map(p => (
-              <li key={p.id} className="p-3 bg-white/30 rounded-xl backdrop-blur">
-                <p className="font-semibold">{p.name}</p>
-                <p>Status: {p.status}</p>
-                <p>Start: {p.startDate || "-"}</p>
-                <p>Due: {p.dueDate || "-"}</p>
-              </li>
-            ))}
-          </ul>
-        )}
+    <div className="p-6">
+      <h1 className="text-xl font-semibold mb-4">Projects</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {projects.map((p: any) => (
+          <div className="p-4 rounded-xl bg-white/10 backdrop-blur border border-white/10" key={p.id}>
+            <div className="font-medium mb-2">{p.title}</div>
+            <DynamicFields raw={p.raw} />
+          </div>
+        ))}
       </div>
-    </main>
+    </div>
   );
 }
 

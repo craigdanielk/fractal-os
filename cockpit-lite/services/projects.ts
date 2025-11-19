@@ -4,11 +4,8 @@ import { query } from "./notion";
 // Projects v1.0 schema
 export interface Project {
   id: string;
-  name: string;
-  status: string;
-  client: string[];
-  startDate: string | null;
-  dueDate: string | null;
+  title: string;
+  raw: any;
 }
 
 function getText(prop: any) {
@@ -32,15 +29,15 @@ function getRelation(prop: any) {
 
 export async function getProjects(): Promise<Project[]> {
   const res = await query(DB.projects);
-  return res.results.map((p: any) => {
-    const props = p.properties;
+  return res.results.map((page: any) => {
+    const props = page.properties || {};
+    const { mapProps } = require("../lib/prop-mapper");
+    const mapped = mapProps(DB.projects, props);
+
     return {
-      id: p.id,
-      name: getText(props["Name"]),
-      status: getSelect(props["Status"]),
-      client: getRelation(props["Client"]),
-      startDate: getDate(props["Start Date"]),
-      dueDate: getDate(props["Due Date"]),
+      id: page.id,
+      title: mapped["Name"]?.value?.title?.[0]?.plain_text ?? "Untitled",
+      raw: mapped,
     };
   });
 }

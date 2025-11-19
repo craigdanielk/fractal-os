@@ -8,15 +8,9 @@ export default async function Dashboard() {
   const econ = await getEconomics();
 
   const today = new Date().toISOString().split("T")[0];
-  const todaysTasks = tasks.filter(t => t.dueDate === today);
+  const todaysTasks = tasks.filter(t => t.raw["Due Date"]?.value?.date?.start === today);
 
-  const econModel = econ[0] || {
-    revenue: 0,
-    labour: 0,
-    overhead: 0,
-    direct: 0,
-    margin: 0,
-  };
+
 
   return (
     <main className="p-10 flex items-center justify-center min-h-screen">
@@ -27,22 +21,30 @@ export default async function Dashboard() {
         <p className="mb-6">
           {projects.length === 0
             ? "No projects found."
-            : projects.map(p => p.name).join(", ")}
+            : projects.map(p => p.title).join(", ")}
         </p>
 
         <h2 className="font-semibold text-lg">Today's Tasks</h2>
         <p className="mb-6">
           {todaysTasks.length === 0
             ? "No tasks for today."
-            : todaysTasks.map(t => t.name).join(", ")}
+            : todaysTasks.map(t => t.title).join(", ")}
         </p>
 
         <h2 className="font-semibold text-lg">Economics Snapshot</h2>
-        <p>Revenue: {econModel.revenue}</p>
-        <p>Labour Cost: {econModel.labour}</p>
-        <p>Overhead: {econModel.overhead}</p>
-        <p>Direct Expenses: {econModel.direct}</p>
-        <p>Margin: {econModel.margin}%</p>
+        {econ.length === 0 ? (
+          <p>No economics data found.</p>
+        ) : (
+          econ.map(e => (
+            <div key={e.id} className="mb-2">
+              <p className="font-medium">{e.title}</p>
+              <div className="text-sm opacity-70">
+                {/* Simple dump of dynamic fields for now */}
+                {Object.keys(e.raw).length} fields available
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </main>
   );

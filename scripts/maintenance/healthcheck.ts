@@ -1,8 +1,21 @@
-// Converted to pure JS-compatible ESM so Node can run without ts-node
+
+
+/**
+ * FractalOS Healthcheck Script
+ *
+ * Performs a lightweight, deterministic set of checks on the
+ * local FractalOS environment. This script contains no business logic,
+ * makes no external network calls, and only reports local status.
+ */
+
 import fs from "fs";
 import path from "path";
 
-function fileExists(filePath) {
+/* ------------------------------
+   Helpers
+-------------------------------*/
+
+function fileExists(filePath: string): boolean {
   try {
     fs.accessSync(filePath, fs.constants.F_OK);
     return true;
@@ -11,7 +24,7 @@ function fileExists(filePath) {
   }
 }
 
-function dirExists(dirPath) {
+function dirExists(dirPath: string): boolean {
   try {
     return fs.statSync(dirPath).isDirectory();
   } catch {
@@ -19,21 +32,46 @@ function dirExists(dirPath) {
   }
 }
 
+/* ------------------------------
+   Healthcheck Logic
+-------------------------------*/
+
 export function runHealthcheck() {
   const root = process.cwd();
+
   const checks = [
-    { name: "Kernel Present", pass: dirExists(path.join(root, "kernel")) },
-    { name: "Cockpit Present", pass: dirExists(path.join(root, "cockpit")) },
-    { name: "API Layer Present", pass: dirExists(path.join(root, "api")) },
-    { name: "Modules Present", pass: dirExists(path.join(root, "modules")) },
-    { name: "Manifest Loaded", pass: fileExists(path.join(root, "kernel/manifests/base.manifest.json")) }
+    {
+      name: "Kernel Present",
+      pass: dirExists(path.join(root, "kernel"))
+    },
+    {
+      name: "Cockpit Present",
+      pass: dirExists(path.join(root, "cockpit"))
+    },
+    {
+      name: "API Layer Present",
+      pass: dirExists(path.join(root, "api"))
+    },
+    {
+      name: "Modules Present",
+      pass: dirExists(path.join(root, "modules"))
+    },
+    {
+      name: "Manifest Loaded",
+      pass: fileExists(path.join(root, "kernel/manifests/base.manifest.json"))
+    }
   ];
 
   console.log("FractalOS Healthcheck\n");
-  checks.forEach(c => console.log(`${c.pass ? "✔" : "✘"} ${c.name}`));
+
+  checks.forEach((check) => {
+    console.log(`${check.pass ? "✔" : "✘"} ${check.name}`);
+  });
+
   console.log("\nHealthcheck Complete.\n");
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run automatically when invoked directly
+if (require.main === module) {
   runHealthcheck();
 }

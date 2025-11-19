@@ -1,91 +1,57 @@
 /*******************************
- * Cockpit Service Layer
+ * Cockpit Service Layer (Notion‑bound)
  *
- * Provides typed wrappers for Kernel API routes.
- * The Cockpit never executes business logic — it only calls Kernel endpoints.
+ * Phase‑1: routes proxy through Kernel → Notion Adapter.
  *******************************/
 
-import type { Task, Project, TimeEntry, EconomicsSnapshot } from "../../kernel/schemas";
+import {
+  Task,
+  Project,
+  Client,
+  TimeEntry,
+  EconomicsModel
+} from "../../kernel/schemas";
+import {
+  notionGetTasks,
+  notionGetProjects,
+  notionGetClients,
+  notionGetTimeEntries,
+  notionGetEconomicsModel,
+  notionCreateTimeEntry
+} from "../../kernel/utils/notion.adapter";
 
-const API_BASE = "/api";
+export const api = {
+  /* ------------------------------
+     Read Operations
+  -------------------------------*/
 
-/* ------------------------------
-   Basic Fetch Wrapper
--------------------------------*/
+  tasks: async (): Promise<Task[]> => {
+    return notionGetTasks();
+  },
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options
-  });
+  projects: async (): Promise<Project[]> => {
+    return notionGetProjects();
+  },
 
-  if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`API Error ${res.status}: ${detail}`);
+  clients: async (): Promise<Client[]> => {
+    return notionGetClients();
+  },
+
+  timeEntries: async (): Promise<TimeEntry[]> => {
+    return notionGetTimeEntries();
+  },
+
+  economicsModel: async (): Promise<EconomicsModel[]> => {
+    return notionGetEconomicsModel();
+  },
+
+  /* ------------------------------
+     Write Operations (Phase‑1)
+  -------------------------------*/
+
+  logTime: async (data: Partial<TimeEntry>): Promise<TimeEntry> => {
+    return notionCreateTimeEntry(data);
   }
-
-  return res.json() as Promise<T>;
-}
-
-/* ------------------------------
-   Task Endpoints
--------------------------------*/
-
-export const getTasks = (): Promise<Task[]> => {
-  return request<Task[]>("/tasks");
 };
 
-export const createTask = (data: Partial<Task>): Promise<Task> => {
-  return request<Task>("/tasks", {
-    method: "POST",
-    body: JSON.stringify(data)
-  });
-};
-
-/* ------------------------------
-   Project Endpoints
--------------------------------*/
-
-export const getProjects = (): Promise<Project[]> => {
-  return request<Project[]>("/projects");
-};
-
-export const createProject = (data: Partial<Project>): Promise<Project> => {
-  return request<Project>("/projects", {
-    method: "POST",
-    body: JSON.stringify(data)
-  });
-};
-
-/* ------------------------------
-   Time Entry Endpoints
--------------------------------*/
-
-export const getTimeEntries = (): Promise<TimeEntry[]> => {
-  return request<TimeEntry[]>("/time");
-};
-
-export const logTime = (data: Partial<TimeEntry>): Promise<TimeEntry> => {
-  return request<TimeEntry>("/time", {
-    method: "POST",
-    body: JSON.stringify(data)
-  });
-};
-
-/* ------------------------------
-   Economics Endpoints
--------------------------------*/
-
-export const getEconomicsOverview = (): Promise<EconomicsSnapshot> => {
-  return request<EconomicsSnapshot>("/economics");
-};
-
-/* ------------------------------
-   Manifest & Pattern Metadata
--------------------------------*/
-
-import manifest from "../../kernel/manifests/base.manifest.json";
-export const getManifest = () => manifest;
-
-import { patternRegistry } from "../../kernel/patterns";
-export const getPatterns = () => patternRegistry;
+export default api;

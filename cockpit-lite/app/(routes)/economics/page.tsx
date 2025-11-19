@@ -1,26 +1,19 @@
 import { getEconomics } from "@/services/economics";
+import { DynamicFields } from "../../../components/DynamicFields";
 
 export default async function EconomicsPage() {
   const econ = await getEconomics();
-  const model = econ[0] || {
-    revenue: 0,
-    labour: 0,
-    overhead: 0,
-    direct: 0,
-    margin: 0,
-  };
-
   return (
-    <main className="p-10 flex justify-center min-h-screen">
-      <div className="glass-card w-[700px] p-8 rounded-3xl shadow-xl">
-        <h1 className="text-3xl font-bold mb-6">Economics Overview</h1>
-
-        <p>Revenue: {model.revenue}</p>
-        <p>Labour Cost: {model.labour}</p>
-        <p>Overhead %: {model.overhead}</p>
-        <p>Direct Expenses: {model.direct}</p>
-        <p>Margin Targets: {model.margin}%</p>
+    <div className="p-6">
+      <h1 className="text-xl font-semibold mb-4">Economics Overview</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {econ.map((e: any) => (
+          <div className="p-4 rounded-xl bg-white/10 backdrop-blur border border-white/10" key={e.id}>
+            <div className="font-medium mb-2">{e.title}</div>
+            <DynamicFields raw={e.raw} />
+          </div>
+        ))}
       </div>
-    </main>
+    </div>
   );
 }

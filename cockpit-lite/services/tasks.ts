@@ -3,10 +3,8 @@ import { query } from "./notion";
 
 export interface Task {
   id: string;
-  name: string;
-  status: string;
-  dueDate: string | null;
-  project: string[];
+  title: string;
+  raw: any;
 }
 
 function getText(prop: any) {
@@ -30,14 +28,15 @@ function getRelation(prop: any) {
 
 export async function getTasks(): Promise<Task[]> {
   const res = await query(DB.tasks);
-  return res.results.map((t: any) => {
-    const props = t.properties;
+  return res.results.map((page: any) => {
+    const props = page.properties || {};
+    const { mapProps } = require("../lib/prop-mapper");
+    const mapped = mapProps(DB.tasks, props);
+
     return {
-      id: t.id,
-      name: getText(props["Name"]),
-      status: getSelect(props["Status"]),
-      dueDate: getDate(props["Due Date"]),
-      project: getRelation(props["Project"]),
+      id: page.id,
+      title: mapped["Name"]?.value?.title?.[0]?.plain_text ?? "Untitled",
+      raw: mapped,
     };
   });
 }

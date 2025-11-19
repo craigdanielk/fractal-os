@@ -1,0 +1,30 @@
+
+
+{
+  "$schema": "./docs/config/fractal.schema.json",
+  "version": "0.1.0",
+  "kernel": {
+    "manifest": "./kernel/manifests/base.manifest.json",
+    "patterns": "./kernel/patterns/base.pattern.json",
+    "schemas": "./kernel/schemas",
+    "commands": "./kernel/commands"
+  },
+  "agents": {
+    "registry": "./agents/registry/commands.json",
+    "workflows": "./agents/workflows/pattern.workflow.json",
+    "tools": "./agents/tools"
+  },
+  "cockpit": {
+    "pages": "./cockpit/pages",
+    "components": "./cockpit/components",
+    "services": "./cockpit/services",
+    "ui": "./cockpit/ui"
+  },
+  "modules": {
+    "automation": "./modules/automation",
+    "crm": "./modules/crm",
+    "finance": "./modules/finance",
+    "manufacturing": "./modules/manufacturing",
+    "web": "./modules/web"
+  }
+}

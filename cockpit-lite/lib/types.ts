@@ -6,23 +6,14 @@
 
 export interface Task {
   id: string;
-  name: string;
-  projectId: string;
-  description?: string;
-  status: "open" | "in_progress" | "blocked" | "completed";
-  createdAt: string;
-  updatedAt: string;
+  title: string;
+  raw: any;
 }
 
 export interface Project {
   id: string;
-  name: string;
-  clientId: string;
-  description?: string;
-  revenue?: number;
-  status: "active" | "paused" | "completed" | "archived";
-  createdAt: string;
-  updatedAt: string;
+  title: string;
+  raw: any;
 }
 
 export interface Client {
@@ -36,13 +27,8 @@ export interface Client {
 
 export interface TimeEntry {
   id: string;
-  taskId: string;
-  projectId: string;
-  userId?: string;
-  hours: number;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
+  title: string;
+  raw: any;
 }
 
 export interface EconomicsModel {

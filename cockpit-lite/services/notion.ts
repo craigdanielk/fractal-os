@@ -11,35 +11,24 @@ const notion = new Client({
 });
 
 // Simple in-memory cache for title property IDs
+import { readSchema, loadSchema } from "../lib/schema-loader";
+
 const titleCache: Record<string, string> = {};
 
 async function getTitlePropertyId(dbId: string): Promise<string> {
-  if (titleCache[dbId]) return titleCache[dbId];
-
-  try {
-    const schema = await notion.databases.retrieve({ database_id: dbId });
-    const props = schema.properties;
-
-    for (const [propName, propData] of Object.entries(props)) {
-      // @ts-ignore
-      if (propData.type === "title") {
-        // @ts-ignore
-        const id = propData.id;
-        titleCache[dbId] = id;
-        return id;
-      }
-    }
-
-    throw new Error(`No title property found for database ${dbId}`);
-  } catch (error: any) {
-    if (error.code === "object_not_found") {
-      throw new Error(`Database ${dbId} not found. Check that the database ID is correct and the integration has access.`);
-    }
-    if (error.code === "unauthorized") {
-      throw new Error(`Unauthorized access to database ${dbId}. Check your NOTION_INTEGRATION_SECRET and ensure the integration has access to this database.`);
-    }
-    throw new Error(`Failed to retrieve database schema for ${dbId}: ${error.message || error}`);
+  const cached = readSchema();
+  if (cached && cached[dbId]) {
+    const props = cached[dbId].properties;
+    const titleProp = Object.entries(props).find(([_, p]: any) => p.type === "title");
+    if (titleProp) return titleProp[1].id;
   }
+
+  // fallback dynamic fetch
+  const liveSchema = await loadSchema(dbId);
+  const titleProp = Object.entries(liveSchema.properties).find(([_, p]: any) => p.type === "title") as [string, any] | undefined;
+  if (titleProp) return titleProp[1].id;
+
+  throw new Error(`No title property found for database ${dbId}`);
 }
 
 // Validate required env vars at startup
@@ -60,34 +49,21 @@ export function validateEnv() {
   }
 }
 
-export async function query(
-  dbId: string | undefined,
-  filter?: any,
-  sorts: any[] = []
-) {
-  if (!dbId) {
-    const key = Object.entries(DB).find(([_, value]) => !value)?.[0];
-    throw new Error(
-      `Database ID for "${key || "UNKNOWN"}" is undefined. Check your .env.local.`
-    );
+export async function query(dbId: string | undefined, filter?: any, sorts: any[] = []) {
+  if (!dbId) throw new Error(`Database ID undefined for query()`);
+
+  const cached = readSchema();
+  if (!cached || !cached[dbId]) {
+    console.warn(`Schema for ${dbId} missing — fetching live…`);
+    await loadSchema(dbId);
   }
 
-  try {
-    return await notion.databases.query({
-      database_id: dbId,
-      filter: filter || undefined,
-      sorts,
-      page_size: 100,
-    });
-  } catch (error: any) {
-    if (error.code === "object_not_found") {
-      throw new Error(`Database ${dbId} not found. Check that the database ID is correct and the integration has access.`);
-    }
-    if (error.code === "unauthorized") {
-      throw new Error(`Unauthorized access to database ${dbId}. Check your NOTION_INTEGRATION_SECRET and ensure the integration has access to this database.`);
-    }
-    throw new Error(`Failed to query database ${dbId}: ${error.message || error}`);
-  }
+  return await notion.databases.query({
+    database_id: dbId,
+    filter: filter ?? undefined,
+    sorts: sorts ?? [],
+    page_size: 100
+  });
 }
 
 export async function getById(dbId: string, pageId: string) {
@@ -115,5 +91,29 @@ export async function update(pageId: string, data: Record<string, any>) {
   return notion.pages.update({
     page_id: pageId,
     properties: data
+  });
+}
+
+export async function createTimeEntry(entry: { taskId: string; projectId: string; hours: number; notes?: string; date?: string }) {
+  return create(DB.TIME!, {
+    title: "Session",
+    props: {
+      "Task": { relation: [{ id: entry.taskId }] },
+      "Project": { relation: [{ id: entry.projectId }] },
+      "Hours": { number: entry.hours },
+      "Session Date": { date: { start: entry.date || new Date().toISOString() } },
+      "Notes": { rich_text: [{ text: { content: entry.notes || "" } }] }
+    }
+  });
+}
+
+export async function createTask(task: { name: string; projectId: string; status?: string; dueDate?: string }) {
+  return create(DB.tasks!, {
+    title: task.name,
+    props: {
+      "Project": { relation: [{ id: task.projectId }] },
+      "Status": { status: { name: task.status || "Not Started" } },
+      "Due Date": task.dueDate ? { date: { start: task.dueDate } } : undefined
+    }
   });
 }
