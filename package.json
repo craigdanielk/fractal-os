@@ -1,0 +1,21 @@
+{
+  "name": "fractal-os",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "seed": "tsx seed-fractalos.ts",
+    "migrate": "tsx migrate.ts",
+    "migrate:bash": "./scripts/setup/migrate-supabase.sh"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.83.0",
+    "dotenv": "^16.4.5",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.7.0",
+    "typescript": "^5"
+  }
+}
+

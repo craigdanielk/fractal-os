@@ -4,6 +4,7 @@ import { getTimeEntries } from "@/services/time";
 import { getEconomics } from "@/services/economics";
 import { getCurrentTenant } from "@/lib/auth/tenant";
 import TenantSwitcher from "@/components/TenantSwitcher";
+import { ClientSelector } from "@/components/ClientSelector";
 
 export default async function Dashboard() {
   const tenantContext = await getCurrentTenant();
@@ -36,11 +37,17 @@ export default async function Dashboard() {
   const currentEconomics = economics[0];
   const totalHours = timeEntries.reduce((sum, entry) => sum + (entry.duration_hours || 0), 0);
 
+  // Note: activeClient is read client-side via ClientSelector component
+  // Server components cannot access localStorage directly
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-semibold">Dashboard</h1>
-        <TenantSwitcher />
+        <div className="flex items-center gap-4">
+          <ClientSelector />
+          <TenantSwitcher />
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="p-4 rounded-xl bg-white/10 backdrop-blur border border-white/10">
