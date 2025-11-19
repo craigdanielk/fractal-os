@@ -1,31 +1,27 @@
-/**
- * Cockpit Tasks Page
- *
- * Displays all tasks, grouped by project.
- * Allows creation of new tasks through the API service layer.
- */
-
-import { Suspense } from "react";
-import { api } from "@/services/api";
-import type { Task, Project } from "@/lib/types";
-import TasksPageClient from "./TasksPageClient";
-
-async function TasksContent() {
-  const [tasks, projects] = await Promise.all([
-    api.getTasks().catch(() => [] as Task[]),
-    api.getProjects().catch(() => [] as Project[]),
-  ]);
-
-  return <TasksPageClient initialTasks={tasks} projects={projects} />;
-}
+import { getTasks } from "@/services/tasks";
 
 export default async function TasksPage() {
+  const tasks = await getTasks();
+
   return (
-    <div className="glass-card">
-      <Suspense fallback={<div className="glass-panel animate-pulse">Loading tasks...</div>}>
-        <TasksContent />
-      </Suspense>
-    </div>
+    <main className="p-10 flex justify-center min-h-screen">
+      <div className="glass-card w-[700px] p-8 rounded-3xl shadow-xl">
+        <h1 className="text-3xl font-bold mb-6">Tasks</h1>
+
+        {tasks.length === 0 ? (
+          <p>No tasks found.</p>
+        ) : (
+          <ul className="space-y-4">
+            {tasks.map(t => (
+              <li key={t.id} className="p-3 bg-white/30 rounded-xl backdrop-blur">
+                <p className="font-semibold">{t.name}</p>
+                <p>Status: {t.status}</p>
+                <p>Due: {t.dueDate || "-"}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </main>
   );
 }
-
