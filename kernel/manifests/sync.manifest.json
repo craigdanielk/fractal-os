@@ -1,0 +1,16 @@
+{
+  "name": "fractal-sync",
+  "version": "1.0.0",
+  "workers": [
+    "sync_projects",
+    "sync_tasks",
+    "sync_clients",
+    "sync_time",
+    "sync_economics"
+  ],
+  "realtime": true,
+  "cron": {
+    "hourly": "supabase/functions/sync-hourly",
+    "daily": "supabase/functions/sync-daily"
+  }
+}

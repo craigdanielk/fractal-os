@@ -5,7 +5,11 @@
  * This is intentionally lightweight for the Lite Cockpit.
  */
 
+"use client";
+
+import { useEffect } from "react";
 import { theme } from "@/ui/theme";
+import { subscribe } from "@/lib/realtime";
 
 interface EconomicsData {
   revenue: number;
@@ -19,9 +23,19 @@ interface EconomicsData {
 
 interface EconomicsChartsProps {
   data: EconomicsData | null;
+  onRefresh?: () => void;
 }
 
-export default function EconomicsCharts({ data }: EconomicsChartsProps) {
+export default function EconomicsCharts({ data, onRefresh }: EconomicsChartsProps) {
+  useEffect(() => {
+    const unsub = subscribe("economics_model", () => {
+      onRefresh?.();
+    });
+    return () => {
+      if (unsub?.unsubscribe) unsub.unsubscribe();
+    };
+  }, [onRefresh]);
+
   if (!data) {
     return <p>No economics data available.</p>;
   }

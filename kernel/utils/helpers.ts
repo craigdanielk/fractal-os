@@ -99,3 +99,48 @@ export function generateId(): string {
 export function now(): string {
   return new Date().toISOString();
 }
+
+/* -------------------------
+   Database Helpers
+--------------------------*/
+
+/**
+ * Safe insert with tenant scoping.
+ * Adds tenant_id to payload before insertion.
+ * Sets tenant context in database session for RLS.
+ */
+export async function safeInsert(table: string, payload: any, tenant: string, ctx?: { role?: string; userId?: string }) {
+  const { setTenantContext } = await import("../drizzle/client");
+  await setTenantContext(tenant);
+  
+  const finalPayload = {
+    ...payload,
+    tenant_id: tenant,
+    ...(ctx?.role && { role: ctx.role }),
+    ...(ctx?.userId && { user_id: ctx.userId }),
+  };
+  
+  // Note: This is a generic helper. For type-safe operations, use the specific API modules.
+  // This function prepares the payload with tenant_id - actual insertion should be done
+  // using the appropriate Drizzle API module (e.g., ProjectAPI.create(finalPayload))
+  return finalPayload;
+}
+
+/**
+ * Safe update with tenant scoping.
+ * Adds tenant_id to payload before update.
+ * Sets tenant context in database session for RLS.
+ */
+export async function safeUpdate(table: string, id: string, payload: any, tenant: string, ctx?: { role?: string; userId?: string }) {
+  const { setTenantContext } = await import("../drizzle/client");
+  await setTenantContext(tenant);
+  
+  payload.tenant_id = tenant;
+  if (ctx?.role) payload.role = ctx.role;
+  if (ctx?.userId) payload.user_id = ctx.userId;
+  
+  // Note: This is a generic helper. For type-safe operations, use the specific API modules.
+  // This function prepares the payload with tenant_id - actual update should be done
+  // using the appropriate Drizzle API module (e.g., ProjectAPI.update(id, payload))
+  return payload;
+}

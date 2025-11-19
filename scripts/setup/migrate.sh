@@ -22,8 +22,18 @@ if [ ! -d "kernel/drizzle/migrations" ]; then
 fi
 
 # Run migrations
-echo "Applying migrations..."
+echo "Applying Drizzle migrations..."
 drizzle-kit migrate \
   --config kernel/drizzle/schema.ts
 
-echo "Migrations applied successfully."
+echo "Drizzle migrations applied successfully."
+
+# If Supabase migrations exist, offer to run them
+if [ -d "supabase/migrations" ] && [ "$(ls -A supabase/migrations/*.sql 2>/dev/null)" ]; then
+  echo ""
+  echo "Note: Supabase migrations found in supabase/migrations/"
+  echo "To apply Supabase migrations, run:"
+  echo "  ./scripts/setup/migrate-supabase.sh"
+  echo "  or"
+  echo "  supabase migration up --schema public"
+fi

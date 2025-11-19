@@ -1,50 +1,10 @@
-import { supabase } from "../../lib/supabase";
+import { createTask, updateTask } from "../tasks";
+import type { DBTask } from "../../lib/supabase-types";
 
-
-
-export async function createTask(input: any, tenantId: string) {
-
-  const { data, error } = await supabase
-
-    .from("tasks")
-
-    .insert([{ ...input, tenant_id: tenantId }])
-
-    .select()
-
-    .single();
-
-
-
-  if (error) throw error;
-
-  return data;
-
+export async function createTaskAction(input: Partial<DBTask>) {
+  return createTask(input);
 }
 
-
-
-export async function updateTask(id: string, input: any, tenantId: string) {
-
-  const { data, error } = await supabase
-
-    .from("tasks")
-
-    .update(input)
-
-    .eq("id", id)
-
-    .eq("tenant_id", tenantId)
-
-    .select()
-
-    .single();
-
-
-
-  if (error) throw error;
-
-  return data;
-
+export async function updateTaskAction(id: string, input: Partial<DBTask>) {
+  return updateTask(id, input);
 }
-

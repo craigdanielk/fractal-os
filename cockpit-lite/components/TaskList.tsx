@@ -7,8 +7,9 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Task } from "@/lib/types";
+import { subscribe } from "@/lib/realtime";
 
 interface TaskListProps {
   tasks: Task[];
@@ -17,6 +18,16 @@ interface TaskListProps {
 
 export default function TaskList({ tasks, onStatusChange }: TaskListProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const unsub = subscribe("tasks", () => {
+      setRefreshKey((prev) => prev + 1);
+    });
+    return () => {
+      if (unsub?.unsubscribe) unsub.unsubscribe();
+    };
+  }, []);
 
   if (tasks.length === 0) {
     return <p className="text-gray-500">No tasks available.</p>;

@@ -11,15 +11,44 @@
 
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import Link from "next/link";
 import { theme } from "@/ui/theme";
+import { syncAll, setOnlineState } from "../services/sync";
 
 interface MainLayoutProps {
   children: ReactNode;
 }
 
 export default function MainLayout({ children }: MainLayoutProps) {
+  useEffect(() => {
+    // Set initial online state
+    setOnlineState(navigator.onLine);
+
+    const handleOnline = async () => {
+      setOnlineState(true);
+      try {
+        await syncAll();
+        console.log("Sync completed");
+      } catch (e) {
+        console.error("Sync failed:", e);
+      }
+    };
+
+    const handleOffline = () => {
+      setOnlineState(false);
+      console.log("Offline mode active");
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
   return (
     <div
       style={{

@@ -9,13 +9,15 @@
 import { useState, useEffect } from "react";
 import type { Task } from "@/lib/types";
 import { logTimeAction } from "@/app/actions";
+import { subscribe } from "@/lib/realtime";
 
 interface TimeTrackerProps {
   tasks: Task[];
   onTimeLogged?: () => void;
+  onRefresh?: () => void;
 }
 
-export default function TimeTracker({ tasks, onTimeLogged }: TimeTrackerProps) {
+export default function TimeTracker({ tasks, onTimeLogged, onRefresh }: TimeTrackerProps) {
   const [selectedTaskId, setSelectedTaskId] = useState("");
   const [isTracking, setIsTracking] = useState(false);
   const [startTime, setStartTime] = useState<Date | null>(null);
@@ -34,6 +36,15 @@ export default function TimeTracker({ tasks, onTimeLogged }: TimeTrackerProps) {
       if (interval) clearInterval(interval);
     };
   }, [isTracking, startTime]);
+
+  useEffect(() => {
+    const unsub = subscribe("time_entries", () => {
+      onRefresh?.();
+    });
+    return () => {
+      if (unsub?.unsubscribe) unsub.unsubscribe();
+    };
+  }, [onRefresh]);
 
   const handleStart = () => {
     if (!selectedTaskId) return;

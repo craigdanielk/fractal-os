@@ -1,22 +1,47 @@
-import { supabase } from '../lib/supabase-schema';
+"use client";
 
-export async function pull(table:string) {
+import { cacheBulkPut, cacheGetAll, queueMutation, drainQueue } from "../lib/offline";
+import { supabase } from "../lib/supabase-client-browser";
+import { cacheInvalidate } from "../lib/cache";
 
-  const { data, error } = await supabase.from(table).select('*');
+let online = true;
 
-  if (error) throw error;
-
-  return data;
-
+export function setOnlineState(state: boolean) {
+  online = state;
 }
 
-export async function push(table:string, payload:any) {
+export async function syncTable(table: string, supabaseTable: string) {
+  if (!online) return;
 
-  const { data, error } = await supabase.from(table).insert(payload).select();
-
-  if (error) throw error;
-
-  return data;
-
+  const { data, error } = await supabase.from(supabaseTable).select("*");
+  if (!error && data) {
+    await cacheBulkPut(table, data);
+  }
 }
 
+export async function syncAll() {
+  if (!online) return;
+
+  await syncTable("projects", "projects");
+  await syncTable("tasks", "tasks");
+  await syncTable("time_entries", "time_entries");
+  await syncTable("economics", "economics_model");
+  
+  // Invalidate memory cache after sync
+  cacheInvalidate("projects:");
+  cacheInvalidate("tasks:");
+  cacheInvalidate("time:");
+  cacheInvalidate("economics:");
+
+  await drainQueue(async (entry) => {
+    await supabase.from(entry.entity).insert(entry.payload);
+  });
+}
+
+export async function offlineSafeInsert(entity: string, payload: any) {
+  if (online) {
+    await supabase.from(entity).insert(payload);
+  } else {
+    await queueMutation("insert", entity, payload);
+  }
+}

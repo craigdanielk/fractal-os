@@ -1,50 +1,10 @@
-import { supabase } from "../../lib/supabase";
+import { createProject, updateProject } from "../projects";
+import type { DBProject } from "../../lib/supabase-types";
 
-
-
-export async function createProject(input: any, tenantId: string) {
-
-  const { data, error } = await supabase
-
-    .from("projects")
-
-    .insert([{ ...input, tenant_id: tenantId }])
-
-    .select()
-
-    .single();
-
-
-
-  if (error) throw error;
-
-  return data;
-
+export async function createProjectAction(input: Partial<DBProject>) {
+  return createProject(input);
 }
 
-
-
-export async function updateProject(id: string, input: any, tenantId: string) {
-
-  const { data, error } = await supabase
-
-    .from("projects")
-
-    .update(input)
-
-    .eq("id", id)
-
-    .eq("tenant_id", tenantId)
-
-    .select()
-
-    .single();
-
-
-
-  if (error) throw error;
-
-  return data;
-
+export async function updateProjectAction(id: string, input: Partial<DBProject>) {
+  return updateProject(id, input);
 }
-
