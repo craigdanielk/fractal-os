@@ -17,6 +17,54 @@ import type {
 
 
 
+export async function apiFetch(path: string, options: any = {}) {
+
+const tenant =
+
+typeof window !== "undefined" ? localStorage.getItem("tenant_id") : null;
+
+const sessionRes = await fetch("/api/auth/session");
+
+const sessionData = sessionRes.ok ? await sessionRes.json() : null;
+
+const { getAuthHeaders } = await import("@/lib/auth");
+
+const authHeaders = sessionData?.user ? await getAuthHeaders(sessionData.user) : {};
+
+const headers = {
+
+"Content-Type": "application/json",
+
+...(tenant && { "X-Tenant-ID": tenant }),
+
+...authHeaders,
+
+...(options.headers || {}),
+
+};
+
+
+
+const res = await fetch(`/api/${path}`, { ...options, headers });
+
+
+
+if (!res.ok) {
+
+const msg = await res.text();
+
+throw new Error(msg);
+
+}
+
+
+
+return res.json();
+
+}
+
+
+
 export const api = {
   // Read operations
   getTasks: () => Data.tasks.list(),

@@ -1,12 +1,13 @@
 import MainLayout from "@/layouts/MainLayout";
 
-import { LiveState } from "../../../../kernel/workers/state";
+import { getClients } from "@/services/clients";
+import { CURRENT_TENANT } from "@/lib/tenant";
 
 
 
 export default async function ClientsPage() {
 
-  const clients = await LiveState.get("clients");
+  const clients = await getClients(CURRENT_TENANT);
 
 
 
@@ -28,13 +29,13 @@ export default async function ClientsPage() {
 
 
 
-              <p className="text-sm text-gray-400">{client.description}</p>
+              <p className="text-sm text-gray-400">{client.notes || "No description"}</p>
 
 
 
               <div className="mt-2 text-xs">
 
-                Projects: {client.projects_expanded.length}
+                Status: {client.status || "N/A"}
 
               </div>
 

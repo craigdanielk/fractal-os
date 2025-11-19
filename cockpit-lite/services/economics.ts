@@ -4,17 +4,15 @@ import { CURRENT_TENANT } from "../lib/tenant";
 
 
 
-export async function getClients(tenantId: string = CURRENT_TENANT) {
+export async function getEconomics(tenantId: string = CURRENT_TENANT) {
 
   const { data, error } = await supabase
 
-    .from("clients")
+    .from("economics_model")
 
     .select("*")
 
-    .eq("tenant_id", tenantId)
-
-    .order("created_at", { ascending: true });
+    .eq("tenant_id", tenantId);
 
 
 
@@ -23,3 +21,4 @@ export async function getClients(tenantId: string = CURRENT_TENANT) {
   return data || [];
 
 }
+

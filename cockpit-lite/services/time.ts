@@ -4,17 +4,17 @@ import { CURRENT_TENANT } from "../lib/tenant";
 
 
 
-export async function getClients(tenantId: string = CURRENT_TENANT) {
+export async function getTimeEntries(tenantId: string = CURRENT_TENANT) {
 
   const { data, error } = await supabase
 
-    .from("clients")
+    .from("time_entries")
 
     .select("*")
 
     .eq("tenant_id", tenantId)
 
-    .order("created_at", { ascending: true });
+    .order("session_date", { ascending: false });
 
 
 
@@ -23,3 +23,4 @@ export async function getClients(tenantId: string = CURRENT_TENANT) {
   return data || [];
 
 }
+

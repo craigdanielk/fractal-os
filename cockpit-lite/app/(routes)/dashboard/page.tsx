@@ -1,49 +1,23 @@
-import { LiveState } from "../../../../kernel/workers/state";
+import { getProjects } from "@/services/projects";
+import { getTasks } from "@/services/tasks";
+import { CURRENT_TENANT } from "@/lib/tenant";
 
 export default async function Dashboard() {
-  const projects = await LiveState.get("projects");
-  const tasks = await LiveState.get("tasks");
-  const econ = await LiveState.get("economics");
-
-  const today = new Date().toISOString().split("T")[0];
-  const todaysTasks = tasks.filter(t => t.raw["Due Date"]?.value?.date?.start === today);
-
-
+  const tenantId = CURRENT_TENANT;
+  const projects = await getProjects(tenantId);
+  const tasks = await getTasks(tenantId);
 
   return (
-    <main className="p-10 flex items-center justify-center min-h-screen">
-      <div className="glass-card w-[520px] p-8 rounded-3xl shadow-xl">
-        <h1 className="text-3xl font-bold mb-6">FractalOS Dashboard</h1>
-
-        <h2 className="font-semibold text-lg">Active Projects</h2>
-        <p className="mb-6">
-          {projects.length === 0
-            ? "No projects found."
-            : projects.map(p => p.name).join(", ")}
-        </p>
-
-        <h2 className="font-semibold text-lg">Today's Tasks</h2>
-        <p className="mb-6">
-          {todaysTasks.length === 0
-            ? "No tasks for today."
-            : todaysTasks.map(t => t.title).join(", ")}
-        </p>
-
-        <h2 className="font-semibold text-lg">Economics Snapshot</h2>
-        {econ.length === 0 ? (
-          <p>No economics data found.</p>
-        ) : (
-          econ.map(e => (
-            <div key={e.id} className="mb-2">
-              <p className="font-medium">{e.title}</p>
-              <div className="text-sm opacity-70">
-                {/* Simple dump of dynamic fields for now */}
-                {Object.keys(e.raw).length} fields available
-              </div>
-            </div>
-          ))
-        )}
+    <div className="p-6">
+      <h1 className="text-xl font-semibold mb-4">Dashboard</h1>
+      <div className="space-y-4">
+        <div>
+          <h2 className="font-semibold mb-2">Projects: {projects.length}</h2>
+        </div>
+        <div>
+          <h2 className="font-semibold mb-2">Tasks: {tasks.length}</h2>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
