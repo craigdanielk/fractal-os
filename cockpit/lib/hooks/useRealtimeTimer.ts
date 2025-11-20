@@ -9,7 +9,7 @@ interface TimerState {
   duration: number;
 }
 
-export function useRealtimeTimer(tenantId: string, userId: string) {
+export function useRealtimeTimer(userId: string) {
   const timerRef = useRef<TimerState>({
     isRunning: false,
     startTime: null,
@@ -17,9 +17,12 @@ export function useRealtimeTimer(tenantId: string, userId: string) {
   });
 
   useEffect(() => {
-    realtimeManager.initialize(tenantId, userId, "User").then(() => {
+    let unsubscribeTable: (() => void) | null = null;
+    let unsubscribeBroadcast: (() => void) | null = null;
+
+    realtimeManager.initialize(userId, "User").then(() => {
       // Subscribe to time entry changes
-      realtimeManager.subscribeToTable("time_entries", (payload) => {
+      unsubscribeTable = realtimeManager.subscribeToTable("time_entries", (payload) => {
         // Handle timer sync events
         if (payload.eventType === "INSERT" && payload.new) {
           // New time entry created
@@ -29,7 +32,7 @@ export function useRealtimeTimer(tenantId: string, userId: string) {
       });
 
       // Subscribe to timer control broadcasts
-      realtimeManager.subscribeToBroadcast("timer:control", (payload) => {
+      unsubscribeBroadcast = realtimeManager.subscribeToBroadcast("timer:control", (payload) => {
         const { action, userId: senderId, taskId } = payload;
         
         if (senderId === userId) return; // Ignore own actions
@@ -55,7 +58,12 @@ export function useRealtimeTimer(tenantId: string, userId: string) {
         }
       });
     });
-  }, [tenantId, userId]);
+
+    return () => {
+      unsubscribeTable?.();
+      unsubscribeBroadcast?.();
+    };
+  }, [userId]);
 
   return timerRef.current;
 }

@@ -21,8 +21,8 @@ export default function MiniGantt({ tasks }: MiniGanttProps) {
   
   const taskDates = tasks
     .map((t) => {
-      const start = t.createdAt ? new Date(t.createdAt) : thirtyDaysAgo;
-      const end = t.updatedAt ? new Date(t.updatedAt) : now;
+      const start = t.created_at ? new Date(t.created_at) : thirtyDaysAgo;
+      const end = t.updated_at ? new Date(t.updated_at) : now;
       return { start, end };
     });
 
@@ -36,8 +36,8 @@ export default function MiniGantt({ tasks }: MiniGanttProps) {
   const totalDays = Math.max(1, Math.ceil((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)));
 
   const getTaskPosition = (task: Task) => {
-    const start = task.createdAt ? new Date(task.createdAt) : minDate;
-    const end = task.updatedAt ? new Date(task.updatedAt) : maxDate;
+    const start = task.created_at ? new Date(task.created_at) : minDate;
+    const end = task.updated_at ? new Date(task.updated_at) : maxDate;
     
     const startDay = Math.floor((start.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24));
     const endDay = Math.floor((end.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24));

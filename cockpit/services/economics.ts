@@ -1,23 +1,13 @@
 import { getCurrentAuthUserId } from "../lib/auth/user";
-import { dbQuery } from "../../../kernel/utils/safe-query";
-import { getScopedSupabaseClient } from "../lib/supabase-client";
-import type { DBEconomicsModel, EconomicsModel } from "../lib/supabase-types";
-import { mapEconomicsModel } from "../lib/supabase-mapper";
-import { cacheGet, cacheSet, cacheInvalidate } from "../lib/cache";
+import { getSupabaseServer } from "../lib/supabase-client-server";
+import type { DBEconomics, Economics } from "../lib/supabase-types";
+import { mapEconomics } from "../lib/supabase-mapper";
+import { cacheGet, cacheSet } from "../lib/cache";
 
 /**
  * Get economics model (always visible, no tenant restriction)
  */
-export async function getEconomics(): Promise<EconomicsModel[]> {
-  // Initialize realtime subscription (client-side only)
-  if (typeof window !== "undefined") {
-    const { subscribe, triggerLocal } = await import("../lib/realtime");
-    subscribe("economics", () => {
-      cacheInvalidate("economics:");
-      triggerLocal("economics", {});
-    });
-  }
-
+export async function getEconomics(): Promise<Economics[]> {
   const cached = cacheGet("economics:list");
   if (cached) return cached;
 
@@ -26,15 +16,15 @@ export async function getEconomics(): Promise<EconomicsModel[]> {
     throw new Error("Not authenticated");
   }
 
-  const { data, error } = await dbQuery("economics", authUserId, {
-    selectOnly: true,
-    noTenantFilter: true, // Economics is always visible
-    order: { column: "created_at", asc: false },
-  });
+  const supabase = getSupabaseServer();
+  const { data, error } = await supabase
+    .from("economics")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   if (error) throw error;
   
-  const mapped = (data || []).map(mapEconomicsModel);
+  const mapped = (data || []).map((e) => mapEconomics(e));
   
   // Cache for offline mode (client-side only)
   if (typeof window !== "undefined") {
@@ -44,7 +34,7 @@ export async function getEconomics(): Promise<EconomicsModel[]> {
         await cacheBulkPut("economics", mapped);
       } else {
         const cached = await cacheGetAll("economics");
-        if (cached.length > 0) return cached.map(mapEconomicsModel);
+        if (cached.length > 0) return cached.map((e: any) => mapEconomics(e));
       }
     } catch (e) {
       // Offline cache not available, continue with fetched data
@@ -58,10 +48,10 @@ export async function getEconomics(): Promise<EconomicsModel[]> {
 /**
  * Get the current economics model (first/latest)
  */
-export async function getCurrentEconomics(): Promise<EconomicsModel | null> {
-  const client = await getScopedSupabaseClient();
+export async function getCurrentEconomics(): Promise<Economics | null> {
+  const supabase = getSupabaseServer();
   
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from("economics")
     .select("*")
     .order("created_at", { ascending: false })
@@ -72,44 +62,32 @@ export async function getCurrentEconomics(): Promise<EconomicsModel | null> {
     if (error.code === "PGRST116") return null; // Not found
     throw error;
   }
-  return data ? mapEconomicsModel(data) : null;
+  return data ? mapEconomics(data) : null;
 }
 
 /**
  * Create a new economics model (admin/agency only)
  */
-export async function createEconomics(input: Partial<DBEconomicsModel>): Promise<EconomicsModel> {
-  const client = await getScopedSupabaseClient();
-  const role = client.getRole();
+export async function createEconomics(input: Partial<DBEconomics>): Promise<Economics> {
+  const supabase = getSupabaseServer();
   
-  if (role !== "admin" && role !== "agency") {
-    throw new Error("Only admins and agencies can create economics models");
-  }
-  
-  const currentTenantId = client.getCurrentTenantId();
-  
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from("economics")
-    .insert([{ ...input, tenant_id: currentTenantId }])
+    .insert([input])
     .select()
     .single();
 
   if (error) throw error;
-  return mapEconomicsModel(data);
+  return mapEconomics(data);
 }
 
 /**
  * Update an existing economics model (admin/agency only)
  */
-export async function updateEconomics(id: string, input: Partial<DBEconomicsModel>): Promise<EconomicsModel> {
-  const client = await getScopedSupabaseClient();
-  const role = client.getRole();
+export async function updateEconomics(id: string, input: Partial<DBEconomics>): Promise<Economics> {
+  const supabase = getSupabaseServer();
   
-  if (role !== "admin" && role !== "agency") {
-    throw new Error("Only admins and agencies can update economics models");
-  }
-  
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from("economics")
     .update(input)
     .eq("id", id)
@@ -117,21 +95,16 @@ export async function updateEconomics(id: string, input: Partial<DBEconomicsMode
     .single();
 
   if (error) throw error;
-  return mapEconomicsModel(data);
+  return mapEconomics(data);
 }
 
 /**
  * Delete an economics model (admin/agency only)
  */
 export async function deleteEconomics(id: string): Promise<void> {
-  const client = await getScopedSupabaseClient();
-  const role = client.getRole();
+  const supabase = getSupabaseServer();
   
-  if (role !== "admin" && role !== "agency") {
-    throw new Error("Only admins and agencies can delete economics models");
-  }
-  
-  const { error } = await client
+  const { error } = await supabase
     .from("economics")
     .delete()
     .eq("id", id);

@@ -33,7 +33,7 @@ export default function TaskList({ tasks, onStatusChange }: TaskListProps) {
     return <p className="text-gray-500">No tasks available.</p>;
   }
 
-  const statusOptions: Task["status"][] = ["open", "in_progress", "blocked", "completed"];
+  const statusOptions: Task["status"][] = ["not_started", "in_progress", "completed", "cancelled"];
 
   return (
     <div className="space-y-2">

@@ -1,0 +1,18 @@
+# PHASE 04 — ALPHA
+# STATUS: GENERATED — PHASE 04 READY
+BEGIN: PHASE_04_ALPHA
+GOAL: Patch critical cross-module dependencies in cockpit and kernel to ensure stable dev-mode launch.
+ACTIONS:
+  - VERIFY directory integrity for cockpit/lib, cockpit/services, kernel/utils.
+  - SCAN for missing imports using machine-to-machine static analysis.
+  - AUTO-GENERATE patches for:
+      * missing safe-query references
+      * mismatched import paths
+      * undefined shared types
+      * outdated realtime-manager bindings
+  - APPLY patches using PATCH_FILE blocks.
+  - RUN static typecheck: `cd cockpit && npm run typecheck`
+  - ON SUCCESS: append "PHASE_04_ALPHA_SUCCESS" to /fractal-state/FractalOS_STATE_LOG.md
+  - ON FAILURE: append error block and HALT orchestrator.
+
+END: PHASE_04_ALPHA

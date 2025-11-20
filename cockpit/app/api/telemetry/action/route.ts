@@ -12,7 +12,6 @@ export async function POST(request: NextRequest) {
     console.log("[Telemetry Action]", {
       action: body.action,
       timestamp: body.timestamp,
-      tenantId: body.tenantId,
       module: body.module,
     });
     

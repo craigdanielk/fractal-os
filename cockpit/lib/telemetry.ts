@@ -1,11 +1,10 @@
 /**
  * Telemetry and Logging
- * Centralized logging with context (clientId, tenantId, no PII)
+ * Centralized logging with context (clientId, userId, no PII)
  */
 
 interface LogContext {
   clientId?: string;
-  tenantId?: string;
   userId?: string;
   module?: string;
   action?: string;

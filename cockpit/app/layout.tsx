@@ -1,10 +1,10 @@
 import "./globals.css";
-import { cookies } from "next/headers";
 import { RealtimeProvider } from "@/components/RealtimeProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SyncBanner } from "@/components/SyncBanner";
 import MainLayout from "@/layouts/MainLayout";
 import { validateEnv } from "@/lib/env";
+import { getCurrentAuthUserId } from "@/lib/auth/user";
 
 // Validate environment on boot
 if (typeof window === "undefined") {
@@ -22,17 +22,8 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const tenant = cookies().get("tenant_id")?.value || "fractal-root";
-  
-  // Get session for tenant-aware auth (mock for now)
-  const session = {
-    user: {
-      tenant_id: tenant,
-      role: "user"
-    }
-  };
-  
-  console.log("Tenant-aware auth active. Tenant ID:", session?.user?.tenant_id);
+  const userId = await getCurrentAuthUserId();
+  const userName = userId || "User";
 
   return (
     <html lang="en">
@@ -42,10 +33,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           rel="stylesheet"
         />
       </head>
-      <body data-tenant={tenant} className="min-h-screen flex bg-black text-white font-sans">
+      <body className="min-h-screen flex bg-black text-white font-sans">
         <ErrorBoundary>
           <SyncBanner />
-          <RealtimeProvider>
+          <RealtimeProvider userId={userId || "anonymous"} userName={userName}>
             <MainLayout>{children}</MainLayout>
           </RealtimeProvider>
         </ErrorBoundary>

@@ -3,35 +3,44 @@
 import { useEffect, useRef } from "react";
 import { realtimeManager } from "../realtime";
 import { useEconomicsStore } from "../store/economics";
-import { mapEconomicsModel } from "../supabase-mapper";
-import type { DBEconomicsModel } from "../supabase-types";
+import { mapEconomics } from "../supabase-mapper";
+import type { DBEconomics } from "../supabase-types";
 
-export function useRealtimeEconomics(tenantId: string, userId: string) {
-  const { setModels, upsertModel, removeModel } = useEconomicsStore();
+export function useRealtimeEconomics(userId: string) {
   const initializedRef = useRef(false);
 
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
-    realtimeManager.initialize(tenantId, userId, "User").then(() => {
-      realtimeManager.subscribeToTable("economics", (payload) => {
+    let unsubscribeTable: (() => void) | null = null;
+    let unsubscribeBroadcast: (() => void) | null = null;
+
+    realtimeManager.initialize(userId, "User").then(() => {
+      unsubscribeTable = realtimeManager.subscribeToTable("economics", (payload) => {
+        const store = useEconomicsStore.getState();
         if (payload.eventType === "INSERT" && payload.new) {
-          upsertModel(mapEconomicsModel(payload.new as DBEconomicsModel));
+          store.upsertModel(mapEconomics(payload.new as DBEconomics));
         } else if (payload.eventType === "UPDATE" && payload.new) {
-          upsertModel(mapEconomicsModel(payload.new as DBEconomicsModel));
+          store.upsertModel(mapEconomics(payload.new as DBEconomics));
         } else if (payload.eventType === "DELETE" && payload.old) {
-          removeModel(payload.old.id);
+          store.removeModel(payload.old.id);
         }
       });
 
       // Broadcast economics updates
-      realtimeManager.subscribeToBroadcast("economics:updated", (payload) => {
+      unsubscribeBroadcast = realtimeManager.subscribeToBroadcast("economics:updated", (payload) => {
+        const store = useEconomicsStore.getState();
         if (payload.model) {
-          upsertModel(mapEconomicsModel(payload.model as DBEconomicsModel));
+          store.upsertModel(mapEconomics(payload.model as DBEconomics));
         }
       });
     });
-  }, [tenantId, userId, upsertModel, removeModel]);
+
+    return () => {
+      unsubscribeTable?.();
+      unsubscribeBroadcast?.();
+    };
+  }, [userId]);
 }
 

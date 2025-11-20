@@ -60,20 +60,9 @@ export async function supabaseMiddleware(
     return NextResponse.redirect(loginUrl);
   }
 
-  // Set user context in headers for RLS
+  // Set user context in headers
   if (user) {
     res.headers.set("x-user-id", user.id);
-    
-    // Get tenant_id from user metadata
-    const tenantId = user.user_metadata?.tenant_id;
-    if (tenantId) {
-      res.headers.set("x-tenant-id", tenantId);
-    }
-    
-    const role = user.user_metadata?.role;
-    if (role) {
-      res.headers.set("x-user-role", role);
-    }
   }
 
   return res;

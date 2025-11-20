@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/services/supabase";
+import { supabase } from "@/lib/supabase-client-browser";
 
 export function ClientSelector() {
   const [clients, setClients] = useState<any[]>([]);

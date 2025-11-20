@@ -1,0 +1,50 @@
+BEGIN:PHASE_01_ALPHA
+MODE: M2M_EXECUTION
+ROLE: CURSOR_AGENT
+
+# Phase Objective
+Bootstrap the cockpit environment, verify env alignment, rebuild dependencies, purge caches, ensure routing bypass, and prepare for interactive execution.
+
+# Execution Steps
+1. VERIFY_ENV:
+   - Run: `npm run verify-env`
+   - Validate all required env vars exist and match schema.
+   - If missing vars → write failure to fractal-state/FractalOS_STATE_LOG.md and HALT.
+
+2. NODE_REBUILD:
+   - Run from cockpit/: `rm -rf node_modules .next && npm install`
+   - Confirm successful install via exit code.
+   - On failure → log + HALT.
+
+3. CACHE_PURGE:
+   - Purge Next.js cache:
+     `rm -rf .next/cache`
+   - Confirm directory removal.
+
+4. ROUTING_BYPASS:
+   - Patch middleware.ts to enforce:
+     ```
+     export const config = {
+       matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+     }
+     ```
+   - Validate file write success.
+
+5. DEV_BOOT:
+   - Run: `npm run dev`
+   - Confirm server starts without critical errors.
+
+# Reporting Rules
+- On any failure → append block to `fractal-state/FractalOS_STATE_LOG.md`:
+  ```
+  [PHASE_01_ALPHA_FAILURE]
+  step: <STEP_NAME>
+  reason: <ERROR_OUTPUT>
+  ```
+- On success → append:
+  ```
+  [PHASE_01_ALPHA_COMPLETE]
+  timestamp: $(date)
+  ```
+
+END:PHASE_01_ALPHA

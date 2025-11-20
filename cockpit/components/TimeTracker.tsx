@@ -66,7 +66,6 @@ export default function TimeTracker({ tasks, onTimeLogged, onRefresh }: TimeTrac
     try {
       await logTimeAction({
         taskId: selectedTaskId,
-        projectId: task.raw["Project"]?.value?.relation?.[0] || "",
         hours: parseFloat(hours.toFixed(2)),
       });
 
@@ -102,7 +101,7 @@ export default function TimeTracker({ tasks, onTimeLogged, onRefresh }: TimeTrac
           <option value="">Select a task...</option>
           {tasks.map((t) => (
             <option key={t.id} value={t.id}>
-              {t.title}
+              {t.name}
             </option>
           ))}
         </select>

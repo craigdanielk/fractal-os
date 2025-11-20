@@ -6,7 +6,6 @@
 
 export interface DBClient {
   id: string;
-  tenant_id: string;
   name: string;
   priority?: string | null;
   notes?: string | null;
@@ -19,7 +18,6 @@ export interface DBClient {
 
 export interface DBProject {
   id: string;
-  tenant_id: string;
   client_id?: string | null;
   name: string;
   description?: string | null;
@@ -40,7 +38,6 @@ export interface DBProject {
 
 export interface DBTask {
   id: string;
-  tenant_id: string;
   project_id?: string | null;
   name: string;
   task_type?: string | null;
@@ -61,7 +58,6 @@ export interface DBTask {
 
 export interface DBTimeEntry {
   id: string;
-  tenant_id: string;
   task_id?: string | null;
   session_name?: string | null;
   session_date?: string | null;
@@ -73,9 +69,8 @@ export interface DBTimeEntry {
   updated_at: string;
 }
 
-export interface DBEconomicsModel {
+export interface DBEconomics {
   id: string;
-  tenant_id: string;
   name?: string | null;
   base_rate?: number | null;
   direct_expenses?: number | null;
@@ -85,9 +80,11 @@ export interface DBEconomicsModel {
   updated_at: string;
 }
 
+// Legacy alias for backward compatibility
+export type DBEconomicsModel = DBEconomics;
+
 export interface DBVendor {
   id: string;
-  tenant_id: string;
   name: string;
   contact_name?: string | null;
   contact_email?: string | null;
@@ -126,11 +123,10 @@ export interface TimeEntry extends Omit<DBTimeEntry, 'tenant_id' | 'task_id'> {
   task?: Task | null;
 }
 
-export interface EconomicsModel extends Omit<DBEconomicsModel, 'tenant_id'> {
-  // Legacy field names for backward compatibility (will be removed)
-  margin_target?: number | null;
-  overhead_percent?: number | null;
-}
+export interface Economics extends Omit<DBEconomics, 'tenant_id'> {}
+
+// Legacy alias for backward compatibility
+export type EconomicsModel = Economics;
 
 export interface Vendor extends Omit<DBVendor, 'tenant_id'> {}
 

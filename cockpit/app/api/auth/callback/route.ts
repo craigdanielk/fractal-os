@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getSupabaseServer } from "@/lib/supabase-client";
-import { ensureIdentity } from "../../../../../kernel/utils/identity";
+import { getSupabaseServer } from "@/lib/supabase-client-server";
+import { ensureIdentity } from "@/lib/auth/identity";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -36,8 +36,6 @@ export async function GET(request: Request) {
         user: {
           id: user.id,
           email: user.email,
-          tenant_id: user.user_metadata?.tenant_id || user.raw_app_meta_data?.tenant_id,
-          role: user.user_metadata?.role || user.raw_app_meta_data?.role || "client",
         },
       }), {
         httpOnly: true,

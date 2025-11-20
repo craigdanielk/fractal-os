@@ -1,0 +1,33 @@
+# PHASE 03 — ALPHA
+# STATUS: ACTIVE
+# Purpose: Begin extraction of all unresolved routing, dynamic export, and layout cascade issues.
+
+BEGIN:PHASE_03_ALPHA
+
+GOAL:
+- Extract all remaining Next.js routing failures.
+- Identify unresolved 404 cascades.
+- Detect broken dynamic exports.
+- Map missing route groups and wrong segment hierarchies.
+- Prepare the actionable repair set for PHASE_04.
+
+TASKS:
+1. Scan `/cockpit/app` for:
+   - orphaned folders
+   - missing `page.tsx`
+   - duplicated `layout.tsx`
+   - invalid route groups `(routes)`
+   - shadowed routes / conflicting dynamic params
+
+2. Validate:
+   - `export const dynamic` usage
+   - middleware segment matches
+   - RSC/Client boundary conflicts
+
+3. Output a structured report into:
+   `/scripts/phases/WAVE_ALPHA/PHASE_03_REPORT.json`
+
+4. Append phase completion entry to:
+   `/fractal-state/FractalOS_STATE_LOG.md`
+
+END:PHASE_03_ALPHA

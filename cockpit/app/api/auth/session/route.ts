@@ -10,11 +10,7 @@ return NextResponse.json({
 
 user: {
 
-id: "local-dev",
-
-tenant_id: "fractal-root",
-
-role: "root"
+id: "local-dev"
 
 }
 

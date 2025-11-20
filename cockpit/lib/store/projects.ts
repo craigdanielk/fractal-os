@@ -3,6 +3,9 @@
 import { create } from "zustand";
 import type { Project } from "../supabase-types";
 
+const initialProjectVersionMap = new Map<string, number>();
+const initialProjectLockedBy = new Map<string, string>();
+
 interface ProjectStore {
   projects: Project[];
   versionMap: Map<string, number>;
@@ -19,8 +22,8 @@ interface ProjectStore {
 
 export const useProjectStore = create<ProjectStore>((set, get) => ({
   projects: [],
-  versionMap: new Map(),
-  lockedBy: new Map(),
+  versionMap: initialProjectVersionMap,
+  lockedBy: initialProjectLockedBy,
 
   setProjects: (projects) => {
     set({ projects });
@@ -49,11 +52,17 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   },
 
   removeProject: (id) => {
-    set((state) => ({
-      projects: state.projects.filter((p) => p.id !== id),
-      versionMap: new Map(state.versionMap).delete(id) && state.versionMap,
-      lockedBy: new Map(state.lockedBy).delete(id) && state.lockedBy,
-    }));
+    set((state) => {
+      const newVersionMap = new Map(state.versionMap);
+      newVersionMap.delete(id);
+      const newLockedBy = new Map(state.lockedBy);
+      newLockedBy.delete(id);
+      return {
+        projects: state.projects.filter((p) => p.id !== id),
+        versionMap: newVersionMap,
+        lockedBy: newLockedBy,
+      };
+    });
   },
 
   lockProject: (id, userId) => {
@@ -73,11 +82,12 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   },
 
   isLocked: (id) => {
-    return get().lockedBy.has(id);
+    const state = get();
+    return state.lockedBy.has(id);
   },
 
   getLockOwner: (id) => {
-    return get().lockedBy.get(id) || null;
+    const state = get();
+    return state.lockedBy.get(id) || null;
   },
 }));
-

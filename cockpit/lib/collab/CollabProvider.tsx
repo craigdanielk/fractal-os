@@ -21,12 +21,11 @@ const CollabContext = createContext<CollabContextValue | null>(null);
 
 interface CollabProviderProps {
   children: React.ReactNode;
-  tenantId: string;
   userId: string;
   userName: string;
 }
 
-export function CollabProvider({ children, tenantId, userId, userName }: CollabProviderProps) {
+export function CollabProvider({ children, userId, userName }: CollabProviderProps) {
   const [state, setState] = useState<CollabState>({
     cursors: new Map(),
     editing: new Map(),
@@ -40,13 +39,14 @@ export function CollabProvider({ children, tenantId, userId, userName }: CollabP
   const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastActivityRef = useRef<number>(Date.now());
 
-  const presenceUsers = usePresenceStore((state) => Array.from(state.users.values()));
-
   // Initialize realtime
   useEffect(() => {
-    realtimeManager.initialize(tenantId, userId, userName).then(() => {
+    let unsubscribeCursor: (() => void) | null = null;
+    let unsubscribeEdit: (() => void) | null = null;
+
+    realtimeManager.initialize(userId, userName).then(() => {
       // Subscribe to cursor broadcasts
-      realtimeManager.subscribeToBroadcast("cursor", (payload: CursorPosition) => {
+      unsubscribeCursor = realtimeManager.subscribeToBroadcast("cursor", (payload: CursorPosition) => {
         if (payload.userId === userId) return; // Ignore own cursor
 
         setState((prev) => {
@@ -69,7 +69,7 @@ export function CollabProvider({ children, tenantId, userId, userName }: CollabP
       });
 
       // Subscribe to editing broadcasts
-      realtimeManager.subscribeToBroadcast("edit", (payload: EditingState & { action: "start" | "stop" }) => {
+      unsubscribeEdit = realtimeManager.subscribeToBroadcast("edit", (payload: EditingState & { action: "start" | "stop" }) => {
         if (payload.userId === userId) return;
 
         setState((prev) => {
@@ -79,11 +79,11 @@ export function CollabProvider({ children, tenantId, userId, userName }: CollabP
 
           if (payload.action === "start") {
             // Add editor
-            const updated = [...fieldEditors.filter((e) => e.userId !== payload.userId), payload];
+            const updated = [...fieldEditors.filter((e: any) => e.userId !== payload.userId), payload];
             recordEditing.set(payload.field, updated);
           } else {
             // Remove editor
-            recordEditing.set(payload.field, fieldEditors.filter((e) => e.userId !== payload.userId));
+            recordEditing.set(payload.field, fieldEditors.filter((e: any) => e.userId !== payload.userId));
           }
 
           newEditing.set(payload.recordId, recordEditing);
@@ -91,22 +91,36 @@ export function CollabProvider({ children, tenantId, userId, userName }: CollabP
         });
       });
     });
-  }, [tenantId, userId, userName]);
 
-  // Update presence state from store
+    return () => {
+      unsubscribeCursor?.();
+      unsubscribeEdit?.();
+    };
+  }, [userId, userName]);
+
+  // Update presence state from store (use ref to track previous users to avoid unnecessary updates)
+  const prevUsersRef = useRef<string>("");
   useEffect(() => {
-    setState((prev) => ({
-      ...prev,
-      presence: presenceUsers.map((u) => ({
-        userId: u.userId,
-        name: u.name,
-        avatar: u.avatar,
-        module: u.module,
-        activity: u.activity,
-        updated_at: u.updated_at,
-      })),
-    }));
-  }, [presenceUsers]);
+    const unsubscribe = usePresenceStore.subscribe((state) => {
+      const users = Array.from(state.users.values());
+      const usersKey = users.map(u => `${u.userId}:${u.updated_at}`).join(",");
+      if (usersKey === prevUsersRef.current) return;
+      prevUsersRef.current = usersKey;
+      
+      setState((prev) => ({
+        ...prev,
+        presence: users.map((u) => ({
+          userId: u.userId,
+          name: u.name,
+          avatar: u.avatar,
+          module: u.module,
+          activity: u.activity,
+          updated_at: u.updated_at,
+        })),
+      }));
+    });
+    return unsubscribe;
+  }, []);
 
   // Cleanup stale cursors
   useEffect(() => {
@@ -178,10 +192,10 @@ export function CollabProvider({ children, tenantId, userId, userName }: CollabP
         const fieldEditors = recordEditing.get(field) || [];
 
         if (editing) {
-          const updated = [...fieldEditors.filter((e) => e.userId !== userId), editState];
+          const updated = [...fieldEditors.filter((e: any) => e.userId !== userId), editState];
           recordEditing.set(field, updated);
         } else {
-          recordEditing.set(field, fieldEditors.filter((e) => e.userId !== userId));
+          recordEditing.set(field, fieldEditors.filter((e: any) => e.userId !== userId));
         }
 
         newEditing.set(recordId, recordEditing);

@@ -1,14 +1,14 @@
 "use client";
 
 import { create } from "zustand";
-import type { EconomicsModel } from "../supabase-types";
+import type { Economics } from "../supabase-types";
 
 interface EconomicsStore {
-  models: EconomicsModel[];
+  models: Economics[];
   versionMap: Map<string, number>;
   
-  setModels: (models: EconomicsModel[]) => void;
-  upsertModel: (model: EconomicsModel) => void;
+  setModels: (models: Economics[]) => void;
+  upsertModel: (model: Economics) => void;
   removeModel: (id: string) => void;
 }
 
@@ -43,10 +43,14 @@ export const useEconomicsStore = create<EconomicsStore>((set) => ({
   },
 
   removeModel: (id) => {
-    set((state) => ({
-      models: state.models.filter((m) => m.id !== id),
-      versionMap: new Map(state.versionMap).delete(id) && state.versionMap,
-    }));
+    set((state) => {
+      const newVersionMap = new Map(state.versionMap);
+      newVersionMap.delete(id);
+      return {
+        models: state.models.filter((m) => m.id !== id),
+        versionMap: newVersionMap,
+      };
+    });
   },
 }));
 

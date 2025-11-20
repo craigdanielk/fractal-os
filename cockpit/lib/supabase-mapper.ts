@@ -9,13 +9,13 @@ import type {
   DBProject,
   DBTask,
   DBTimeEntry,
-  DBEconomicsModel,
+  DBEconomics,
   DBVendor,
   Client,
   Project,
   Task,
   TimeEntry,
-  EconomicsModel,
+  Economics,
   Vendor,
 } from "./supabase-types";
 
@@ -33,7 +33,7 @@ export function mapClient(db: DBClient, projects?: DBProject[]): Client {
     email: db.email,
     created_at: db.created_at,
     updated_at: db.updated_at,
-    projects: projects?.map(mapProject) || [],
+    projects: projects?.map((p) => mapProject(p)) || [],
   };
 }
 
@@ -59,7 +59,7 @@ export function mapProject(db: DBProject, client?: DBClient, tasks?: DBTask[]): 
     created_at: db.created_at,
     updated_at: db.updated_at,
     client: client ? mapClient(client) : null,
-    tasks: tasks?.map(mapTask) || [],
+    tasks: tasks?.map((t) => mapTask(t)) || [],
   };
 }
 
@@ -91,7 +91,7 @@ export function mapTask(
     updated_at: db.updated_at,
     project: project ? mapProject(project) : null,
     parent_task: parentTask ? mapTask(parentTask) : null,
-    subtasks: subtasks?.map(mapTask) || [],
+    subtasks: subtasks?.map((t) => mapTask(t)) || [],
     time_entries: timeEntries || [],
   };
 }
@@ -117,7 +117,7 @@ export function mapTimeEntry(db: DBTimeEntry, task?: DBTask): TimeEntry {
 /**
  * Map a database economics model to UI economics model
  */
-export function mapEconomicsModel(db: DBEconomicsModel): EconomicsModel {
+export function mapEconomics(db: DBEconomics): Economics {
   return {
     id: db.id,
     name: db.name || null,

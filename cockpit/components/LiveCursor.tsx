@@ -42,10 +42,10 @@ export function LiveCursor({ recordId, field, containerRef }: LiveCursorProps) {
       }
 
       // Calculate position using a more reliable method
+      let measureDiv: HTMLDivElement | null = null;
       try {
         const textBeforeCursor = input.value.substring(0, cursor.position);
-        const textNode = document.createTextNode(textBeforeCursor);
-        const measureDiv = document.createElement("div");
+        measureDiv = document.createElement("div");
         measureDiv.style.position = "absolute";
         measureDiv.style.visibility = "hidden";
         measureDiv.style.whiteSpace = "pre-wrap";
@@ -65,11 +65,18 @@ export function LiveCursor({ recordId, field, containerRef }: LiveCursorProps) {
         cursorEl.style.top = `${top + 2}px`;
         cursorEl.style.opacity = "1";
 
-        document.body.removeChild(measureDiv);
+        if (measureDiv && measureDiv.parentNode) {
+          document.body.removeChild(measureDiv);
+        }
+        measureDiv = null;
       } catch (error) {
         // Fallback: position at end if calculation fails
         cursorEl.style.left = "0px";
         cursorEl.style.top = "0px";
+        if (measureDiv && measureDiv.parentNode) {
+          document.body.removeChild(measureDiv);
+        }
+        measureDiv = null;
       }
 
       // Add label
@@ -81,8 +88,6 @@ export function LiveCursor({ recordId, field, containerRef }: LiveCursorProps) {
         cursorEl.appendChild(label);
       }
       label.textContent = cursor.userName;
-
-      document.body.removeChild(measureDiv);
     });
 
     // Remove stale cursors

@@ -39,7 +39,7 @@ export default function TimeEntryForm({
           <option value="">Select task</option>
           {tasks.map((t) => (
             <option key={t.id} value={t.id}>
-              {t.title}
+              {t.name}
             </option>
           ))}
         </select>

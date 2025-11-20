@@ -1,0 +1,34 @@
+# PHASE 02 — ALPHA
+# STATUS: EMPTY — READY FOR POPULATION
+# This phase will be dynamically populated by orchestration.
+
+
+# PHASE 02 — ALPHA
+# TASK: SYSTEM PRE-FLIGHT + DIRECTORY SANITY CHECK
+# MODE: M2M ONLY — NO HUMAN LANGUAGE
+
+BEGIN:EXECUTE
+CHECK_DIR_STRUCTURE:
+  - VERIFY folder "./cockpit"
+  - VERIFY folder "./kernel"
+  - VERIFY folder "./supabase"
+  - VERIFY folder "./scripts"
+  - IF any missing → WRITE to FractalOS_STATE_LOG "ALPHA_02_FAIL:DIR_MISSING"
+  - ELSE WRITE "ALPHA_02_OK:DIR_STRUCTURE_VALID"
+
+CHECK_PACKAGE_JSON:
+  - LOAD root package.json
+  - ASSERT fields: name, scripts, dependencies
+  - IF malformed → WRITE "ALPHA_02_FAIL:PACKAGE_JSON_INVALID"
+  - ELSE WRITE "ALPHA_02_OK:PACKAGE_JSON_VALID"
+
+CHECK_ENV:
+  - RUN "npm run verify-env"
+  - IF exit != 0 → WRITE "ALPHA_02_FAIL:ENV_INVALID"
+  - ELSE WRITE "ALPHA_02_OK:ENV_VALID"
+
+END:EXECUTE
+
+BEGIN:NEXT_PHASE_SIGNAL
+WRITE "ALPHA_PHASE_02_COMPLETE"
+END:NEXT_PHASE_SIGNAL

@@ -5,22 +5,23 @@ import { realtimeManager } from "../realtime";
 import { usePresenceStore } from "../store/presence";
 
 export function usePresence(
-  tenantId: string,
   userId: string,
   userName: string
 ) {
-  const { setUsers, updateUser, removeUser } = usePresenceStore();
   const initializedRef = useRef(false);
 
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
-    realtimeManager.initialize(tenantId, userId, userName).then(() => {
-      // Subscribe to presence changes
-      realtimeManager.subscribeToPresence((state) => {
+    let unsubscribePresence: (() => void) | null = null;
+
+    realtimeManager.initialize(userId, userName).then(() => {
+      // Subscribe to presence changes via broadcast
+      unsubscribePresence = realtimeManager.subscribeToBroadcast("presence", (state) => {
+        const store = usePresenceStore.getState();
         const users = Object.values(state).flat() as any[];
-        setUsers(users);
+        store.setUsers(users);
       });
 
       // Update presence when module/activity changes
@@ -33,8 +34,9 @@ export function usePresence(
     });
 
     return () => {
+      unsubscribePresence?.();
       delete (window as any).updatePresence;
     };
-  }, [tenantId, userId, userName, setUsers]);
+  }, [userId, userName]);
 }
 

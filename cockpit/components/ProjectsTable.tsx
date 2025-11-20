@@ -43,9 +43,9 @@ export default function ProjectsTable({ projects, onRefresh }: ProjectsTableProp
         <tbody>
           {projects.map((project) => (
             <tr key={project.id} className="border-b border-white/10">
-              <td className="p-2">{project.project_name}</td>
+              <td className="p-2">{project.name}</td>
               <td className="p-2">{project.status}</td>
-              <td className="p-2">{project.progress ?? 0}%</td>
+              <td className="p-2">N/A</td>
               <td className="p-2">{project.health_score || "N/A"}</td>
             </tr>
           ))}

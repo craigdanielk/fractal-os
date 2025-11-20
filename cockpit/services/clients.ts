@@ -1,4 +1,4 @@
-import { getScopedSupabaseClient } from "../lib/supabase-client";
+import { getSupabaseServer } from "../lib/supabase-client-server";
 import type { DBClient, Client } from "../lib/supabase-types";
 import { mapClient } from "../lib/supabase-mapper";
 
@@ -6,31 +6,27 @@ import { mapClient } from "../lib/supabase-mapper";
  * Get all clients for accessible tenants
  */
 export async function getClients(): Promise<Client[]> {
-  const client = await getScopedSupabaseClient();
-  const accessibleTenantIds = client.getAccessibleTenantIds();
+  const supabase = getSupabaseServer();
   
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from("clients")
     .select("*")
-    .in("tenant_id", accessibleTenantIds)
     .order("created_at", { ascending: true });
 
   if (error) throw error;
-  return (data || []).map(mapClient);
+  return (data || []).map((c) => mapClient(c));
 }
 
 /**
  * Get a single client by ID (must be in accessible tenants)
  */
 export async function getClientById(id: string): Promise<Client | null> {
-  const client = await getScopedSupabaseClient();
-  const accessibleTenantIds = client.getAccessibleTenantIds();
+  const supabase = getSupabaseServer();
   
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from("clients")
     .select("*")
     .eq("id", id)
-    .in("tenant_id", accessibleTenantIds)
     .single();
 
   if (error) {
@@ -44,12 +40,11 @@ export async function getClientById(id: string): Promise<Client | null> {
  * Create a new client (in current tenant)
  */
 export async function createClient(input: Partial<DBClient>): Promise<Client> {
-  const client = await getScopedSupabaseClient();
-  const currentTenantId = client.getCurrentTenantId();
+  const supabase = getSupabaseServer();
   
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from("clients")
-    .insert([{ ...input, tenant_id: currentTenantId }])
+    .insert([input])
     .select()
     .single();
 
@@ -61,14 +56,12 @@ export async function createClient(input: Partial<DBClient>): Promise<Client> {
  * Update an existing client (must be in accessible tenants)
  */
 export async function updateClient(id: string, input: Partial<DBClient>): Promise<Client> {
-  const client = await getScopedSupabaseClient();
-  const accessibleTenantIds = client.getAccessibleTenantIds();
+  const supabase = getSupabaseServer();
   
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from("clients")
     .update(input)
     .eq("id", id)
-    .in("tenant_id", accessibleTenantIds)
     .select()
     .single();
 
@@ -80,14 +73,12 @@ export async function updateClient(id: string, input: Partial<DBClient>): Promis
  * Delete a client (must be in accessible tenants)
  */
 export async function deleteClient(id: string): Promise<void> {
-  const client = await getScopedSupabaseClient();
-  const accessibleTenantIds = client.getAccessibleTenantIds();
+  const supabase = getSupabaseServer();
   
-  const { error } = await client
+  const { error } = await supabase
     .from("clients")
     .delete()
-    .eq("id", id)
-    .in("tenant_id", accessibleTenantIds);
+    .eq("id", id);
 
   if (error) throw error;
 }

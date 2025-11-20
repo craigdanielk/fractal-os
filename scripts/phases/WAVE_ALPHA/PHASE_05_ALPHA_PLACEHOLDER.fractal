@@ -1,0 +1,21 @@
+# PHASE 05 — ALPHA
+# STATUS: POPULATED
+# This phase contains the ALPHA Wave Phase 05 instructions executed by Cursor.
+# MACHINE-ORCHESTRATION BLOCK — DO NOT EDIT MANUALLY
+
+BEGIN:PHASE_05
+TARGET: cockpit
+MODE: m2m
+ACTIONS:
+  - validate:imports
+  - validate:routes
+  - audit:client-server-boundaries
+  - enforce:tenant-isolation
+  - enforce:server-only-constraints
+  - ensure:dynamic-exports
+  - confirm:middleware-flow-sequence
+  - run:next-dev-probe
+  - capture:logs->fractal-state/FractalOS_STATE_LOG.md
+END:PHASE_05
+
+# Cursor will read this block and execute sequentially.

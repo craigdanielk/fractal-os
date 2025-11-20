@@ -6,48 +6,47 @@ import { useTaskStore } from "../store/tasks";
 import { mapTask } from "../supabase-mapper";
 import type { DBTask } from "../supabase-types";
 
-export function useRealtimeTasks(tenantId: string, userId: string) {
-  const { setTasks, upsertTask, removeTask } = useTaskStore();
+// Stabilize store access by using getState outside of React hooks to avoid stale closures
+
+export function useRealtimeTasks(userId: string) {
   const initializedRef = useRef(false);
 
   useEffect(() => {
-    if (!tenantId || !userId || initializedRef.current) return;
+    if (!userId || initializedRef.current) return;
     initializedRef.current = true;
 
-    let cleanup: (() => void) | null = null;
+    let unsubscribeTable: (() => void) | null = null;
+    let unsubscribeLock: (() => void) | null = null;
 
     // Initialize realtime connection
-    realtimeManager.initialize(tenantId, userId, "User").then(() => {
+    realtimeManager.initialize(userId, "User").then(() => {
       // Subscribe to tasks table changes
-      const unsubscribeTable = realtimeManager.subscribeToTable("tasks", (payload) => {
+      unsubscribeTable = realtimeManager.subscribeToTable("tasks", (payload) => {
+        const store = useTaskStore.getState();
         if (payload.eventType === "INSERT" && payload.new) {
-          upsertTask(mapTask(payload.new as DBTask));
+          store.upsertTask(mapTask(payload.new as DBTask));
         } else if (payload.eventType === "UPDATE" && payload.new) {
-          upsertTask(mapTask(payload.new as DBTask));
+          store.upsertTask(mapTask(payload.new as DBTask));
         } else if (payload.eventType === "DELETE" && payload.old) {
-          removeTask(payload.old.id);
+          store.removeTask(payload.old.id);
         }
       });
 
       // Subscribe to lock changes via broadcast
-      const unsubscribeLock = realtimeManager.subscribeToBroadcast("task:lock", (payload) => {
+      unsubscribeLock = realtimeManager.subscribeToBroadcast("task:lock", (payload) => {
+        const store = useTaskStore.getState();
         const { taskId, userId: lockUserId, action } = payload;
         if (action === "lock") {
-          useTaskStore.getState().lockTask(taskId, lockUserId);
+          store.lockTask(taskId, lockUserId);
         } else if (action === "unlock") {
-          useTaskStore.getState().unlockTask(taskId);
+          store.unlockTask(taskId);
         }
       });
-
-      cleanup = () => {
-        unsubscribeTable?.();
-        unsubscribeLock?.();
-      };
     });
 
     return () => {
-      cleanup?.();
+      unsubscribeTable?.();
+      unsubscribeLock?.();
     };
-  }, [tenantId, userId, upsertTask, removeTask]);
+  }, [userId]);
 }
-

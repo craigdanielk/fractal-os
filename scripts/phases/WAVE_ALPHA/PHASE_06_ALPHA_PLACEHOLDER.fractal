@@ -1,0 +1,46 @@
+# PHASE 06 — ALPHA
+# STATUS: READY — MACHINE-INSTRUCTIONS ACTIVE
+# Purpose: Deep dependency sweep + cross-module integrity verification.
+
+BEGIN: M2M-OPS
+TARGET: CURSOR
+MODE: EXECUTE
+
+BEGIN: TASK:DEPENDENCY_GRAPH_REBUILD
+- Scan entire cockpit directory.
+- Rebuild dependency graph.
+- Identify circular imports.
+- Identify missing module paths.
+- Identify misaligned relative paths.
+END: TASK:DEPENDENCY_GRAPH_REBUILD
+
+BEGIN: TASK:ZUSTAND_CONSISTENCY_PASS
+- Verify all stores import from correct entrypoints.
+- Ensure no store cross-imports another store directly.
+- Ensure all actions use functional updates.
+- Ensure no store creates subscriptions inside services.
+END: TASK:ZUSTAND_CONSISTENCY_PASS
+
+BEGIN: TASK:REACT_BOUNDARY_AUDIT
+- Verify all components under `app/(routes)` include proper boundary wrappers.
+- Check for any components that:
+  * call hooks conditionally
+  * use client-only APIs in server files
+  * have missing "use client" directives
+END: TASK:REACT_BOUNDARY_AUDIT
+
+BEGIN: TASK:SUPABASE_API_SCHEMA_VERIFY
+- Check all API routes under `/app/api`.
+- Verify all server actions use `supabase-client-server`.
+- Verify no browser client imported into server code.
+END: TASK:SUPABASE_API_SCHEMA_VERIFY
+
+BEGIN: TASK:REPORT
+- Output: dependency graph summary
+- Output: list of fixed imports
+- Output: list of broken imports
+- Output: list of corrected client/server boundaries
+- Write final report to fractal-state logs
+END: TASK:REPORT
+
+END: M2M-OPS

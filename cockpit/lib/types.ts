@@ -10,13 +10,15 @@ export type {
   Project,
   Task,
   TimeEntry,
-  EconomicsModel,
+  Economics,
+  EconomicsModel, // Legacy alias
   Vendor,
   DBClient,
   DBProject,
   DBTask,
   DBTimeEntry,
-  DBEconomicsModel,
+  DBEconomics,
+  DBEconomicsModel, // Legacy alias
   DBVendor,
 } from "./supabase-types";
 

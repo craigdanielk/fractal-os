@@ -8,23 +8,28 @@ interface CrossTabMessage {
   updated_at: string;
 }
 
-export function useCrossTabSync(tenantId: string, onMessage?: (msg: CrossTabMessage) => void) {
+export function useCrossTabSync(onMessage?: (msg: CrossTabMessage) => void) {
   const channelRef = useRef<BroadcastChannel | null>(null);
+  const onMessageRef = useRef(onMessage);
 
   useEffect(() => {
-    const channel = new BroadcastChannel(`fractal:${tenantId}:ui`);
+    onMessageRef.current = onMessage;
+  }, [onMessage]);
+
+  useEffect(() => {
+    const channel = new BroadcastChannel("fractal:ui");
     channelRef.current = channel;
 
     channel.onmessage = (event: MessageEvent<CrossTabMessage>) => {
-      if (onMessage) {
-        onMessage(event.data);
+      if (onMessageRef.current) {
+        onMessageRef.current(event.data);
       }
     };
 
     return () => {
       channel.close();
     };
-  }, [tenantId, onMessage]);
+  }, []);
 
   const sendMessage = (type: string, data: any) => {
     if (channelRef.current) {

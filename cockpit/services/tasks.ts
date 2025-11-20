@@ -1,5 +1,5 @@
 import { getCurrentAuthUserId } from "../lib/auth/user";
-import { dbQuery } from "../../../kernel/utils/safe-query";
+import { getSupabaseServer } from "../lib/supabase-client-server";
 import type { DBTask, Task } from "../lib/supabase-types";
 import { mapTask } from "../lib/supabase-mapper";
 import { cacheGet, cacheSet, cacheInvalidate } from "../lib/cache";
@@ -8,15 +8,6 @@ import { cacheGet, cacheSet, cacheInvalidate } from "../lib/cache";
  * Get all tasks for accessible tenants
  */
 export async function getTasks(): Promise<Task[]> {
-  // Initialize realtime subscription (client-side only)
-  if (typeof window !== "undefined") {
-    const { subscribe, triggerLocal } = await import("../lib/realtime");
-    subscribe("tasks", () => {
-      cacheInvalidate("tasks:");
-      triggerLocal("tasks", {});
-    });
-  }
-
   const cached = cacheGet("tasks:list");
   if (cached) return cached;
 
@@ -25,14 +16,15 @@ export async function getTasks(): Promise<Task[]> {
     throw new Error("Not authenticated");
   }
 
-  const { data, error } = await dbQuery("tasks", authUserId, {
-    selectOnly: true,
-    order: { column: "updated_at", asc: false },
-  });
+  const supabase = getSupabaseServer();
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("*")
+    .order("updated_at", { ascending: false });
 
   if (error) throw error;
   
-  const mapped = (data || []).map(mapTask);
+  const mapped = (data || []).map((t) => mapTask(t));
   
   // Cache for offline mode (client-side only)
   if (typeof window !== "undefined") {
@@ -42,7 +34,7 @@ export async function getTasks(): Promise<Task[]> {
         await cacheBulkPut("tasks", mapped);
       } else {
         const cached = await cacheGetAll("tasks");
-        if (cached.length > 0) return cached.map(mapTask);
+        if (cached.length > 0) return cached.map((t: any) => mapTask(t));
       }
     } catch (e) {
       // Offline cache not available, continue with fetched data
@@ -57,14 +49,12 @@ export async function getTasks(): Promise<Task[]> {
  * Get a single task by ID (must be in accessible tenants)
  */
 export async function getTaskById(id: string): Promise<Task | null> {
-  const client = await getScopedSupabaseClient();
-  const accessibleTenantIds = client.getAccessibleTenantIds();
+  const supabase = getSupabaseServer();
   
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from("tasks")
     .select("*")
     .eq("id", id)
-    .in("tenant_id", accessibleTenantIds)
     .single();
 
   if (error) {
@@ -78,48 +68,43 @@ export async function getTaskById(id: string): Promise<Task | null> {
  * Get tasks for a specific project
  */
 export async function getTasksByProject(projectId: string): Promise<Task[]> {
-  const client = await getScopedSupabaseClient();
-  const accessibleTenantIds = client.getAccessibleTenantIds();
+  const supabase = getSupabaseServer();
   
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from("tasks")
     .select("*")
     .eq("project_id", projectId)
-    .in("tenant_id", accessibleTenantIds)
     .order("updated_at", { ascending: false });
 
   if (error) throw error;
-  return (data || []).map(mapTask);
+  return (data || []).map((t) => mapTask(t));
 }
 
 /**
  * Get subtasks for a parent task
  */
 export async function getSubtasks(parentTaskId: string): Promise<Task[]> {
-  const client = await getScopedSupabaseClient();
-  const accessibleTenantIds = client.getAccessibleTenantIds();
+  const supabase = getSupabaseServer();
   
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from("tasks")
     .select("*")
     .eq("parent_task_id", parentTaskId)
-    .in("tenant_id", accessibleTenantIds)
     .order("created_at", { ascending: true });
 
   if (error) throw error;
-  return (data || []).map(mapTask);
+  return (data || []).map((t) => mapTask(t));
 }
 
 /**
  * Create a new task (in current tenant)
  */
 export async function createTask(input: Partial<DBTask>): Promise<Task> {
-  const client = await getScopedSupabaseClient();
-  const currentTenantId = client.getCurrentTenantId();
+  const supabase = getSupabaseServer();
   
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from("tasks")
-    .insert([{ ...input, tenant_id: currentTenantId }])
+    .insert([input])
     .select()
     .single();
 
@@ -131,14 +116,12 @@ export async function createTask(input: Partial<DBTask>): Promise<Task> {
  * Update an existing task (must be in accessible tenants)
  */
 export async function updateTask(id: string, input: Partial<DBTask>): Promise<Task> {
-  const client = await getScopedSupabaseClient();
-  const accessibleTenantIds = client.getAccessibleTenantIds();
+  const supabase = getSupabaseServer();
   
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from("tasks")
     .update(input)
     .eq("id", id)
-    .in("tenant_id", accessibleTenantIds)
     .select()
     .single();
 
@@ -150,14 +133,12 @@ export async function updateTask(id: string, input: Partial<DBTask>): Promise<Ta
  * Delete a task (must be in accessible tenants)
  */
 export async function deleteTask(id: string): Promise<void> {
-  const client = await getScopedSupabaseClient();
-  const accessibleTenantIds = client.getAccessibleTenantIds();
+  const supabase = getSupabaseServer();
   
-  const { error } = await client
+  const { error } = await supabase
     .from("tasks")
     .delete()
-    .eq("id", id)
-    .in("tenant_id", accessibleTenantIds);
+    .eq("id", id);
 
   if (error) throw error;
 }

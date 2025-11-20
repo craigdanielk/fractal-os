@@ -1,5 +1,6 @@
 import { getCurrentAuthUserId } from "../lib/auth/user";
-import { dbQuery } from "../../../kernel/utils/safe-query";
+import { dbQuery } from "../lib/safe-query";
+import { getSupabaseServer } from "../lib/supabase-client-server";
 import type { DBVendor, Vendor } from "../lib/supabase-types";
 import { mapVendor } from "../lib/supabase-mapper";
 
@@ -12,27 +13,26 @@ export async function getVendors(): Promise<Vendor[]> {
     throw new Error("Not authenticated");
   }
 
-  const { data, error } = await dbQuery("vendors", authUserId, {
-    selectOnly: true,
-    order: { column: "created_at", asc: true },
-  });
+  const supabase = getSupabaseServer();
+  const { data, error } = await supabase
+    .from("vendors")
+    .select("*")
+    .order("created_at", { ascending: true });
 
   if (error) throw error;
-  return (data || []).map(mapVendor);
+  return (data || []).map((v) => mapVendor(v));
 }
 
 /**
  * Get a single vendor by ID (must be in accessible tenants)
  */
 export async function getVendorById(id: string): Promise<Vendor | null> {
-  const client = await getScopedSupabaseClient();
-  const accessibleTenantIds = client.getAccessibleTenantIds();
+  const supabase = getSupabaseServer();
   
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from("vendors")
     .select("*")
     .eq("id", id)
-    .in("tenant_id", accessibleTenantIds)
     .single();
 
   if (error) {
@@ -46,12 +46,11 @@ export async function getVendorById(id: string): Promise<Vendor | null> {
  * Create a new vendor (in current tenant)
  */
 export async function createVendor(input: Partial<DBVendor>): Promise<Vendor> {
-  const client = await getScopedSupabaseClient();
-  const currentTenantId = client.getCurrentTenantId();
+  const supabase = getSupabaseServer();
   
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from("vendors")
-    .insert([{ ...input, tenant_id: currentTenantId }])
+    .insert([input])
     .select()
     .single();
 
@@ -63,14 +62,12 @@ export async function createVendor(input: Partial<DBVendor>): Promise<Vendor> {
  * Update an existing vendor (must be in accessible tenants)
  */
 export async function updateVendor(id: string, input: Partial<DBVendor>): Promise<Vendor> {
-  const client = await getScopedSupabaseClient();
-  const accessibleTenantIds = client.getAccessibleTenantIds();
+  const supabase = getSupabaseServer();
   
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from("vendors")
     .update(input)
     .eq("id", id)
-    .in("tenant_id", accessibleTenantIds)
     .select()
     .single();
 
@@ -82,14 +79,12 @@ export async function updateVendor(id: string, input: Partial<DBVendor>): Promis
  * Delete a vendor (must be in accessible tenants)
  */
 export async function deleteVendor(id: string): Promise<void> {
-  const client = await getScopedSupabaseClient();
-  const accessibleTenantIds = client.getAccessibleTenantIds();
+  const supabase = getSupabaseServer();
   
-  const { error } = await client
+  const { error } = await supabase
     .from("vendors")
     .delete()
-    .eq("id", id)
-    .in("tenant_id", accessibleTenantIds);
+    .eq("id", id);
 
   if (error) throw error;
 }

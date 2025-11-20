@@ -13,7 +13,6 @@ export async function POST(request: NextRequest) {
       error: body.error,
       stack: body.stack,
       timestamp: body.timestamp,
-      tenantId: body.tenantId,
       componentStack: body.componentStack,
     });
     

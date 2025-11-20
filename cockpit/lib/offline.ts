@@ -3,11 +3,12 @@ import Dexie from "dexie";
 export const db = new Dexie("fractal_offline_cache");
 
 db.version(1).stores({
-  projects: "id, tenant_id, updated_at",
-  tasks: "id, project_id, tenant_id, updated_at",
-  time_entries: "id, task_id, tenant_id, updated_at",
-  economics: "id, tenant_id, updated_at",
+  projects: "id, updated_at",
+  tasks: "id, project_id, updated_at",
+  time_entries: "id, task_id, updated_at",
+  economics: "id, updated_at",
   sync_queue: "++local_id, type, entity, payload, timestamp",
+  sync_metadata: "key, value, updated_at",
 });
 
 export async function cachePut(table: string, item: any) {
@@ -32,10 +33,10 @@ export async function queueMutation(type: string, entity: string, payload: any) 
 }
 
 export async function drainQueue(syncFn: (entry: any) => Promise<void>) {
-  const queue = await db.sync_queue.toArray();
+  const queue = await (db as any).sync_queue.toArray();
   for (const entry of queue) {
     await syncFn(entry);
-    await db.sync_queue.delete(entry.local_id);
+    await (db as any).sync_queue.delete(entry.local_id);
   }
 }
 

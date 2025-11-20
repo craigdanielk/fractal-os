@@ -1,3 +1,5 @@
+"use client";
+
 import { createClient } from "@supabase/supabase-js";
 
 export const supabase = createClient(
@@ -7,18 +9,14 @@ export const supabase = createClient(
 
 export async function logAudit(event: string, payload: any = {}) {
   try {
-    // Get current user and tenant context
+    // Get current user context
     const { data: { user } } = await supabase.auth.getUser();
-    const tenantId = typeof window !== "undefined" 
-      ? localStorage.getItem("tenant_id") 
-      : null;
 
     await supabase.from("audit_logs").insert({
       event,
       payload,
       ts: new Date().toISOString(),
       user_id: user?.id || null,
-      tenant_id: tenantId || null,
     });
   } catch (error) {
     // Silently fail audit logging to not break application flow

@@ -2,7 +2,6 @@
 const nextConfig = {
   experimental: {
     optimizePackageImports: ["@supabase/supabase-js", "react", "framer-motion"],
-    partialPrerendering: true,
   },
   compress: true,
   reactStrictMode: true,

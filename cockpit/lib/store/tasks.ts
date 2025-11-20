@@ -50,11 +50,17 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   },
 
   removeTask: (id) => {
-    set((state) => ({
-      tasks: state.tasks.filter((t) => t.id !== id),
-      versionMap: new Map(state.versionMap).delete(id) && state.versionMap,
-      lockedBy: new Map(state.lockedBy).delete(id) && state.lockedBy,
-    }));
+    set((state) => {
+      const newVersionMap = new Map(state.versionMap);
+      newVersionMap.delete(id);
+      const newLockedBy = new Map(state.lockedBy);
+      newLockedBy.delete(id);
+      return {
+        tasks: state.tasks.filter((t) => t.id !== id),
+        versionMap: newVersionMap,
+        lockedBy: newLockedBy,
+      };
+    });
   },
 
   lockTask: (id, userId) => {

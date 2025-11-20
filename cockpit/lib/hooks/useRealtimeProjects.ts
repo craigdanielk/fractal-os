@@ -6,34 +6,43 @@ import { useProjectStore } from "../store/projects";
 import { mapProject } from "../supabase-mapper";
 import type { DBProject } from "../supabase-types";
 
-export function useRealtimeProjects(tenantId: string, userId: string) {
-  const { setProjects, upsertProject, removeProject } = useProjectStore();
+export function useRealtimeProjects(userId: string) {
   const initializedRef = useRef(false);
 
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
-    realtimeManager.initialize(tenantId, userId, "User").then(() => {
-      realtimeManager.subscribeToTable("projects", (payload) => {
+    let unsubscribeTable: (() => void) | null = null;
+    let unsubscribeLock: (() => void) | null = null;
+
+    realtimeManager.initialize(userId, "User").then(() => {
+      unsubscribeTable = realtimeManager.subscribeToTable("projects", (payload) => {
+        const store = useProjectStore.getState();
         if (payload.eventType === "INSERT" && payload.new) {
-          upsertProject(mapProject(payload.new as DBProject));
+          store.upsertProject(mapProject(payload.new as DBProject));
         } else if (payload.eventType === "UPDATE" && payload.new) {
-          upsertProject(mapProject(payload.new as DBProject));
+          store.upsertProject(mapProject(payload.new as DBProject));
         } else if (payload.eventType === "DELETE" && payload.old) {
-          removeProject(payload.old.id);
+          store.removeProject(payload.old.id);
         }
       });
 
-      realtimeManager.subscribeToBroadcast("project:lock", (payload) => {
+      unsubscribeLock = realtimeManager.subscribeToBroadcast("project:lock", (payload) => {
+        const store = useProjectStore.getState();
         const { projectId, userId: lockUserId, action } = payload;
         if (action === "lock") {
-          useProjectStore.getState().lockProject(projectId, lockUserId);
+          store.lockProject(projectId, lockUserId);
         } else if (action === "unlock") {
-          useProjectStore.getState().unlockProject(projectId);
+          store.unlockProject(projectId);
         }
       });
     });
-  }, [tenantId, userId, upsertProject, removeProject]);
+
+    return () => {
+      unsubscribeTable?.();
+      unsubscribeLock?.();
+    };
+  }, [userId]);
 }
 

@@ -1,8 +1,7 @@
 "use server";
 
-import { getSupabaseServer } from "../supabase-client";
+import { getSupabaseServer } from "../supabase-client-server";
 import { getCurrentAuthUserId } from "../auth/user";
-import { getCurrentTenant } from "../auth/tenant";
 
 export type LockRecordType = "task" | "project" | "economics" | "time";
 
@@ -19,11 +18,6 @@ export async function lockRecord(
       return { success: false, error: "Not authenticated" };
     }
 
-    const tenantContext = await getCurrentTenant();
-    if (!tenantContext) {
-      return { success: false, error: "No tenant context" };
-    }
-
     const supabase = getSupabaseServer();
 
     // Clean up expired locks first
@@ -36,7 +30,6 @@ export async function lockRecord(
     const { error } = await supabase
       .from("editing_locks")
       .insert({
-        tenant_id: tenantContext.tenantId,
         record_type: recordType,
         record_id: recordId,
         locked_by: authUserId,
@@ -70,17 +63,11 @@ export async function unlockRecord(
       return { success: false };
     }
 
-    const tenantContext = await getCurrentTenant();
-    if (!tenantContext) {
-      return { success: false };
-    }
-
     const supabase = getSupabaseServer();
 
     await supabase
       .from("editing_locks")
       .delete()
-      .eq("tenant_id", tenantContext.tenantId)
       .eq("record_type", recordType)
       .eq("record_id", recordId)
       .eq("locked_by", authUserId);
@@ -104,11 +91,6 @@ export async function heartbeat(
       return { success: false };
     }
 
-    const tenantContext = await getCurrentTenant();
-    if (!tenantContext) {
-      return { success: false };
-    }
-
     const supabase = getSupabaseServer();
 
     const { error } = await supabase
@@ -116,7 +98,6 @@ export async function heartbeat(
       .update({
         expires_at: new Date(Date.now() + 30 * 1000).toISOString(),
       })
-      .eq("tenant_id", tenantContext.tenantId)
       .eq("record_type", recordType)
       .eq("record_id", recordId)
       .eq("locked_by", authUserId);

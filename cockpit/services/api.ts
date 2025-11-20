@@ -1,88 +1,41 @@
-/**
- * API Service Layer
- * 
- * Provides typed access to all data operations
- * Now uses Supabase via Data provider
- */
+"use server";
 
-import { Data } from "@/lib/data";
-import type {
-  Task,
-  Project,
-  Client,
-  TimeEntry,
-  EconomicsModel,
-  EconomicsOverview,
-} from "@/lib/types";
+import { getTasks, createTask } from "./tasks";
+import { getProjects, createProject } from "./projects";
+import { getTimeEntries, createTimeEntry } from "./time";
+import { getEconomics, createEconomics } from "./economics";
 
-
-
-export async function apiFetch(path: string, options: any = {}) {
-
-const tenant =
-
-typeof window !== "undefined" ? localStorage.getItem("tenant_id") : null;
-
-const sessionRes = await fetch("/api/auth/session");
-
-const sessionData = sessionRes.ok ? await sessionRes.json() : null;
-
-const { getAuthHeaders } = await import("@/lib/auth");
-
-const authHeaders = sessionData?.user ? await getAuthHeaders(sessionData.user) : {};
-
-const headers = {
-
-"Content-Type": "application/json",
-
-...(tenant && { "X-Tenant-ID": tenant }),
-
-...authHeaders,
-
-...(options.headers || {}),
-
+export const API = {
+  tasks: {
+    list: async () => getTasks(),
+    create: async (data: any) => createTask(data),
+  },
+  projects: {
+    list: async () => getProjects(),
+    create: async (data: any) => createProject(data),
+  },
+  time: {
+    list: async () => getTimeEntries(),
+    create: async (data: any) => createTimeEntry(data),
+  },
+  economics: {
+    list: async () => getEconomics(),
+    create: async (data: any) => createEconomics(data),
+  }
 };
 
-
-
-const res = await fetch(`/api/${path}`, { ...options, headers });
-
-
-
-if (!res.ok) {
-
-const msg = await res.text();
-
-throw new Error(msg);
-
-}
-
-
-
-return res.json();
-
-}
-
-
-
+// Backward compatibility exports
 export const api = {
-  // Read operations
-  getTasks: () => Data.tasks.list(),
-  getProjects: () => Data.projects.list(),
-  getSessions: () => Data.time.list(),
-  getEconomics: () => Data.economics.list(),
-
-  // Write operations
-  logTime: (data: any) => Data.time.create(data),
-  createTask: (data: any) => Data.tasks.create(data),
-
-  // Convenience aliases
-  tasks: () => Data.tasks.list(),
-  projects: () => Data.projects.list(),
-  sessions: () => Data.time.list(),
-  economics: () => Data.economics.list(),
+  getTasks: () => API.tasks.list(),
+  getProjects: () => API.projects.list(),
+  getSessions: () => API.time.list(),
+  getEconomics: () => API.economics.list(),
+  logTime: (data: any) => API.time.create(data),
+  createTask: (data: any) => API.tasks.create(data),
+  tasks: () => API.tasks.list(),
+  projects: () => API.projects.list(),
+  sessions: () => API.time.list(),
+  economics: () => API.economics.list(),
 };
 
-// Default export for backward compatibility
 export default api;
-
