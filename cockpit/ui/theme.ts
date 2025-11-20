@@ -1,35 +1,8 @@
-
-
-/**
- * Cockpit Theme
- *
- * Simple, extendable design tokens for the Lite Cockpit.
- * Not a full design system — just centralised UI constants.
- */
-
 export const theme = {
-  colors: {
-    primary: "#1a73e8",
-    secondary: "#e8710a",
-    background: "#ffffff",
-    surface: "#f7f7f7",
-    text: "#222222",
-    subtleText: "#666666",
-    border: "#dddddd"
-  },
-  spacing: (value: number) => `${value * 8}px`,
-  radius: {
-    small: "4px",
-    medium: "8px",
-    large: "12px"
-  },
-  font: {
-    family: "sans-serif",
-    size: {
-      small: "0.85rem",
-      normal: "1rem",
-      large: "1.25rem",
-      title: "1.75rem"
-    }
-  }
+  glass: "backdrop-filter blur-md bg-white/5 border border-white/10 rounded-xl shadow-xl",
+  panel: "bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl",
+  textPrimary: "text-white/90",
+  textSecondary: "text-white/60",
+  heading: "font-semibold text-white tracking-tight",
+  brand: "font-semibold tracking-tight text-2xl",
 };

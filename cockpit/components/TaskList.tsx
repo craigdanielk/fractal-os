@@ -1,48 +1,48 @@
-
-
 /**
  * TaskList Component
  *
- * Stateless UI component for rendering a list of tasks.
+ * Enhanced UI component with inline status editing.
  * The Cockpit passes the tasks into this component.
  */
 
-import type { Task } from "../../kernel/schemas";
+"use client";
+
+import { useState, useEffect } from "react";
+import type { Task } from "@/lib/types";
+import { subscribe } from "@/lib/realtime";
 
 interface TaskListProps {
   tasks: Task[];
+  onStatusChange?: (taskId: string, newStatus: Task["status"]) => void;
 }
 
-export default function TaskList({ tasks }: TaskListProps) {
+export default function TaskList({ tasks, onStatusChange }: TaskListProps) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const unsub = subscribe("tasks", () => {
+      setRefreshKey((prev) => prev + 1);
+    });
+    return () => {
+      if (unsub?.unsubscribe) unsub.unsubscribe();
+    };
+  }, []);
+
   if (tasks.length === 0) {
-    return <p>No tasks available.</p>;
+    return <p className="text-gray-500">No tasks available.</p>;
   }
 
+  const statusOptions: Task["status"][] = ["open", "in_progress", "blocked", "completed"];
+
   return (
-    <div
-      style={{
-        border: "1px solid #e5e5e5",
-        borderRadius: "8px",
-        padding: "1rem",
-        background: "white"
-      }}
-    >
-      <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
-        {tasks.map((t) => (
-          <li
-            key={t.id}
-            style={{
-              padding: "0.5rem 0",
-              borderBottom: "1px solid #f0f0f0"
-            }}
-          >
-            <div style={{ fontWeight: 600 }}>{t.name}</div>
-            <div style={{ opacity: 0.6, fontSize: "0.85rem" }}>
-              Status: {t.status}
-            </div>
-          </li>
-        ))}
-      </ul>
+    <div className="space-y-2">
+      {tasks.map((t) => (
+        <div key={t.id} className="bg-white/5 border border-white/10 rounded-xl p-4">
+          <div className="font-semibold">{t.name}</div>
+          <div className="text-white/60 text-sm">{t.status}</div>
+        </div>
+      ))}
     </div>
   );
 }

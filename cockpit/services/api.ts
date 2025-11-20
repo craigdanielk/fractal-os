@@ -1,57 +1,88 @@
-/*******************************
- * Cockpit Service Layer (Notion‑bound)
- *
- * Phase‑1: routes proxy through Kernel → Notion Adapter.
- *******************************/
+/**
+ * API Service Layer
+ * 
+ * Provides typed access to all data operations
+ * Now uses Supabase via Data provider
+ */
 
-import {
+import { Data } from "@/lib/data";
+import type {
   Task,
   Project,
   Client,
   TimeEntry,
-  EconomicsModel
-} from "../../kernel/schemas";
-import {
-  notionGetTasks,
-  notionGetProjects,
-  notionGetClients,
-  notionGetTimeEntries,
-  notionGetEconomicsModel,
-  notionCreateTimeEntry
-} from "../../kernel/utils/notion.adapter";
+  EconomicsModel,
+  EconomicsOverview,
+} from "@/lib/types";
 
-export const api = {
-  /* ------------------------------
-     Read Operations
-  -------------------------------*/
 
-  tasks: async (): Promise<Task[]> => {
-    return notionGetTasks();
-  },
 
-  projects: async (): Promise<Project[]> => {
-    return notionGetProjects();
-  },
+export async function apiFetch(path: string, options: any = {}) {
 
-  clients: async (): Promise<Client[]> => {
-    return notionGetClients();
-  },
+const tenant =
 
-  timeEntries: async (): Promise<TimeEntry[]> => {
-    return notionGetTimeEntries();
-  },
+typeof window !== "undefined" ? localStorage.getItem("tenant_id") : null;
 
-  economicsModel: async (): Promise<EconomicsModel[]> => {
-    return notionGetEconomicsModel();
-  },
+const sessionRes = await fetch("/api/auth/session");
 
-  /* ------------------------------
-     Write Operations (Phase‑1)
-  -------------------------------*/
+const sessionData = sessionRes.ok ? await sessionRes.json() : null;
 
-  logTime: async (data: Partial<TimeEntry>): Promise<TimeEntry> => {
-    return notionCreateTimeEntry(data);
-  }
+const { getAuthHeaders } = await import("@/lib/auth");
+
+const authHeaders = sessionData?.user ? await getAuthHeaders(sessionData.user) : {};
+
+const headers = {
+
+"Content-Type": "application/json",
+
+...(tenant && { "X-Tenant-ID": tenant }),
+
+...authHeaders,
+
+...(options.headers || {}),
+
 };
 
+
+
+const res = await fetch(`/api/${path}`, { ...options, headers });
+
+
+
+if (!res.ok) {
+
+const msg = await res.text();
+
+throw new Error(msg);
+
+}
+
+
+
+return res.json();
+
+}
+
+
+
+export const api = {
+  // Read operations
+  getTasks: () => Data.tasks.list(),
+  getProjects: () => Data.projects.list(),
+  getSessions: () => Data.time.list(),
+  getEconomics: () => Data.economics.list(),
+
+  // Write operations
+  logTime: (data: any) => Data.time.create(data),
+  createTask: (data: any) => Data.tasks.create(data),
+
+  // Convenience aliases
+  tasks: () => Data.tasks.list(),
+  projects: () => Data.projects.list(),
+  sessions: () => Data.time.list(),
+  economics: () => Data.economics.list(),
+};
+
+// Default export for backward compatibility
 export default api;
+
