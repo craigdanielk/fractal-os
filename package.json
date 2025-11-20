@@ -5,7 +5,9 @@
   "scripts": {
     "seed": "tsx seed-fractalos.ts",
     "migrate": "tsx migrate.ts",
-    "migrate:bash": "./scripts/setup/migrate-supabase.sh"
+    "migrate:cli": "tsx migrate-supabase-cli.ts",
+    "migrate:bash": "./scripts/setup/migrate-supabase.sh",
+    "verify-env": "tsx scripts/verify-env.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.83.0",

@@ -160,11 +160,11 @@ All pages updated with:
 ### Created:
 - `supabase/migrations/0005_model_x_tenanting.sql`
 - `supabase/migrations/0006_model_x_rls_policies.sql`
-- `cockpit-lite/lib/auth/tenant.ts`
-- `cockpit-lite/lib/supabase-client.ts`
-- `cockpit-lite/components/TenantSwitcher.tsx`
-- `cockpit-lite/app/api/tenants/route.ts`
-- `cockpit-lite/middleware.ts`
+- `cockpit/lib/auth/tenant.ts`
+- `cockpit/lib/supabase-client.ts`
+- `cockpit/components/TenantSwitcher.tsx`
+- `cockpit/app/api/tenants/route.ts`
+- `cockpit/middleware.ts`
 
 ### Modified:
 - All service files (`services/*.ts`)
@@ -173,7 +173,7 @@ All pages updated with:
 - `services/actions/*.ts`
 
 ### Deleted:
-- `cockpit-lite/lib/tenant.ts` (replaced with auth/tenant.ts)
+- `cockpit/lib/tenant.ts` (replaced with auth/tenant.ts)
 
 ## Testing Checklist
 
